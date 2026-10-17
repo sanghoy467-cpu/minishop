@@ -1,5 +1,5 @@
 /* =========================================================
-   상호상회 — 상품 데이터 (주방용품 30종)
+   상호상회 — 상품 데이터 (주방용품 29종)
 
    image : 자유 이용 라이선스 이미지의 외부 링크
            · cdn.stocksnap.io     — StockSnap (CC0)
@@ -99,19 +99,6 @@ var PRODUCTS = [
     flag: "",
     emoji: "🥚",
     image: "https://cdn.stocksnap.io/img-thumbs/960w/HBF5CWQP3S.jpg"
-  },
-  {
-    id: 8,
-    name: "법랑 채반 볼 24cm",
-    category: "조리도구",
-    brand: "상호키친",
-    price: 27000,
-    discount: 33,
-    rating: 4.5,
-    reviews: 428,
-    flag: "",
-    emoji: "🥗",
-    image: "https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvdXB3azYxNjY2NjUyLXdpa2ltZWRpYS1pbWFnZS1rb3diMGozcS5qcGc.jpg"
   },
   {
     id: 9,
