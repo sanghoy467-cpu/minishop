@@ -1,6 +1,6 @@
 /* =========================================================
    상호상회 (Sangho Market) — Mini Shop
-   주방용품 전문 미니 쇼핑몰
+   믹서기 전문점
    ========================================================= */
 
 :root{
@@ -34,9 +34,10 @@
           "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
   --serif: "Nanum Myeongjo", "Batang", Georgia, serif;
 
-  /* 배경 이미지 — 나무 선반에 도자기가 진열된 프로방스풍 가게
-     StockSnap "Ceramics Pottery" by Barn Images (CC0) */
-  --hero-bg: url("https://cdn.stocksnap.io/img-thumbs/960w/SWDR6XR7YS.jpg");
+  /* 배경 이미지 — 주방에서 믹서기 컵에 재료를 넣는 모습
+     Wikimedia Commons "Woman prepares a protein shake in a modern kitchen"
+     by Shixart1985 (CC BY 2.0) — 라이선스상 푸터에 저작자 표시가 필요합니다 */
+  --hero-bg: url("https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Woman_prepares_a_protein_shake_in_a_modern_kitchen.jpg/1280px-Woman_prepares_a_protein_shake_in_a_modern_kitchen.jpg");
 }
 
 *,*::before,*::after{ box-sizing:border-box; }
@@ -405,11 +406,11 @@ input{ font-family:inherit; }
   background-color:#3b2a1c;
   background-image:var(--hero-bg);
   background-size:cover;
-  background-position:center 46%;
+  background-position:center 34%;
 }
 .hero::after{
   content:""; position:absolute; inset:0;
-  background:linear-gradient(100deg, rgba(52,34,22,.88) 0%, rgba(52,34,22,.66) 46%, rgba(52,34,22,.16) 100%);
+  background:linear-gradient(100deg, rgba(28,22,18,.90) 0%, rgba(28,22,18,.62) 48%, rgba(28,22,18,.12) 100%);
 }
 .hero__inner{
   position:relative; z-index:1;
@@ -790,3 +791,10 @@ input{ font-family:inherit; }
   .main{ padding:30px 16px 70px; }
   .header__inner{ padding:12px 16px; }
 }
+
+/* 푸터 안의 출처 링크 (CC BY 저작자 표시) */
+.footer__bottom a{
+  color:#c6d8d2; text-decoration:underline; text-underline-offset:2px;
+  transition:color .15s;
+}
+.footer__bottom a:hover{ color:#fff; }
