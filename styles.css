@@ -1,5 +1,5 @@
 /* =========================================================
-   상호상회 (Sangho Market) — Mini Shop
+   삼환 물류(주) (Samhwan Logistics) — Mini Shop
    믹서기 전문점
    ========================================================= */
 
@@ -34,10 +34,9 @@
           "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
   --serif: "Nanum Myeongjo", "Batang", Georgia, serif;
 
-  /* 배경 이미지 — 주방에서 믹서기 컵에 재료를 넣는 모습
-     Wikimedia Commons "Woman prepares a protein shake in a modern kitchen"
-     by Shixart1985 (CC BY 2.0) — 라이선스상 푸터에 저작자 표시가 필요합니다 */
-  --hero-bg: url("https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Woman_prepares_a_protein_shake_in_a_modern_kitchen.jpg/1280px-Woman_prepares_a_protein_shake_in_a_modern_kitchen.jpg");
+  /* 배경 이미지 — 재료를 담은 믹서기 용기 (인물 없음)
+     Rawpixel (CC0 / Public Domain) — 저작자 표시 의무 없음 */
+  --hero-bg: url("https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvYTAxOS1qYWt1YmstMDQyOS1oZWFsdGh5LXNtb290aGllLWluZ3JlZGllbnRzLmpwZw.jpg");
 }
 
 *,*::before,*::after{ box-sizing:border-box; }
@@ -406,11 +405,11 @@ input{ font-family:inherit; }
   background-color:#3b2a1c;
   background-image:var(--hero-bg);
   background-size:cover;
-  background-position:center 34%;
+  background-position:center 50%;
 }
 .hero::after{
   content:""; position:absolute; inset:0;
-  background:linear-gradient(100deg, rgba(28,22,18,.90) 0%, rgba(28,22,18,.62) 48%, rgba(28,22,18,.12) 100%);
+  background:linear-gradient(100deg, rgba(38,26,16,.90) 0%, rgba(38,26,16,.70) 48%, rgba(38,26,16,.30) 100%);
 }
 .hero__inner{
   position:relative; z-index:1;

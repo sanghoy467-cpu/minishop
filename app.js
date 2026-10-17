@@ -1,5 +1,5 @@
 /* =========================================================
-   상호상회 — 애플리케이션 로직
+   삼환 물류(주) — 애플리케이션 로직
 
    · 사이트는 로그인 없이 누구나 둘러볼 수 있습니다.
    · 찜 / 장바구니도 비회원 상태에서 그대로 쓸 수 있습니다.
@@ -86,7 +86,7 @@
       '<rect width="400" height="400" fill="#ece3d6"/>' +
       '<text x="200" y="186" font-size="72" text-anchor="middle">' + label + '</text>' +
       '<text x="200" y="244" font-size="20" fill="#9c8e83" text-anchor="middle" ' +
-      'font-family="sans-serif">상호상회</text></svg>';
+      'font-family="sans-serif">삼환 물류(주)</text></svg>';
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   }
 
@@ -134,7 +134,7 @@
     state.user = user;                       // { id, uid }
     renderAuthBar();
     closeModals();
-    toast(welcomeMessage || (user.id + '님, 환영합니다'), '🍳');
+    toast(welcomeMessage || (user.id + '님, 환영합니다'), '🥤');
 
     // 주문하려다 로그인한 경우라면 그대로 주문을 이어서 진행합니다.
     if (pendingCheckout) {
@@ -205,7 +205,7 @@
       DB.auth.signIn(email, pw).then(function (user) {
         $('#loginPw').value = '';
         busy(form, false);
-        signedIn(user, user.id + '님, 상호상회에 오신 것을 환영합니다');
+        signedIn(user, user.id + '님, 삼환 물류(주)에 오신 것을 환영합니다');
       }).catch(function (error) {
         busy(form, false);
         err.textContent = DB.describeError(error, '로그인에 실패했습니다.');
@@ -268,7 +268,7 @@
         : null;
 
       if (user) {
-        signedIn(user, user.id + '님, 상호상회에 오신 것을 환영합니다');
+        signedIn(user, user.id + '님, 삼환 물류(주)에 오신 것을 환영합니다');
       } else {
         // 이메일 인증이 필요한 경우 — 로그인 탭으로 보냅니다.
         switchTab('login');
@@ -364,7 +364,7 @@
     var btn = $('#headerAuthBtn');
     if (signedIn) {
       btn.querySelector('.label').textContent = state.user.id;
-      btn.querySelector('.icon-btn__emoji').textContent = '🍳';
+      btn.querySelector('.icon-btn__emoji').textContent = '🥤';
       btn.classList.remove('icon-btn--accent');
     } else {
       btn.querySelector('.label').textContent = '로그인';

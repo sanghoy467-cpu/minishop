@@ -1,4 +1,4 @@
-# 상호상회 — 믹서기 전문점 🥤
+# 삼환 물류(주) — 믹서기 전문점 🥤
 
 **믹서기 전문점** 컨셉의 미니 쇼핑몰 데모입니다.
 빌드 도구 없는 정적 사이트이며, 회원·주문 데이터는 **Supabase**에 저장됩니다.
@@ -91,11 +91,9 @@ RLS 정책이 서버에서 강제하므로, 브라우저 코드를 조작해도
 - [Rawpixel](https://www.rawpixel.com) — CC0 / Public Domain
 - [Unsplash](https://unsplash.com) — Unsplash License
 
-배경 사진만 저작자 표시가 필요한 라이선스라 푸터에 출처를 넣었습니다 —
-[Woman prepares a protein shake in a modern kitchen](https://commons.wikimedia.org/wiki/File:Woman_prepares_a_protein_shake_in_a_modern_kitchen.jpg)
-by [Shixart1985](https://commons.wikimedia.org/wiki/User:Shixart1985),
-[CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
-**배경을 교체할 때는 푸터의 출처 표시도 함께 바꿔야 합니다.**
+배경 사진도 CC0 이라 저작자 표시 의무가 없습니다.
+**저작자 표시가 필요한 라이선스(CC BY 등)로 배경을 교체할 때는
+푸터에 출처 표시를 함께 넣어야 합니다.**
 
 이미지 로딩에 실패하면 자동으로 이모지 썸네일로 대체됩니다.
 
