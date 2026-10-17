@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>상호상회 · 주방용품 전문 미니샵</title>
+<meta name="description" content="상호상회 — 매일 쓰는 주방용품을 특가로. 냄비, 프라이팬, 칼, 도마, 식기까지 30종 할인 중.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%B3%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://images.unsplash.com">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ======================= 로그인 게이트 ======================= -->
+<div class="gate" id="gate" hidden>
+  <div class="gate__card">
+    <div class="gate__brand">
+      <div class="gate__mark">🍳</div>
+      <h1 class="gate__name">상호상회</h1>
+      <p class="gate__tag">Sangho Kitchen Market</p>
+    </div>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label class="field__label" for="loginId">아이디</label>
+        <input class="field__input" type="text" id="loginId" name="id"
+               placeholder="아이디를 입력하세요" autocomplete="username" spellcheck="false">
+      </div>
+      <div class="field">
+        <label class="field__label" for="loginPw">비밀번호</label>
+        <input class="field__input" type="password" id="loginPw" name="password"
+               placeholder="비밀번호를 입력하세요" autocomplete="current-password">
+      </div>
+      <p class="gate__error" id="loginError" role="alert"></p>
+      <button class="btn-primary" type="submit">로그인하고 쇼핑 시작</button>
+    </form>
+
+    <p class="gate__hint">
+      데모 상점입니다. <b>아이디와 비밀번호를 아무거나</b> 입력하면<br>
+      바로 입장할 수 있어요. (입력값은 이 브라우저에만 저장됩니다)
+    </p>
+  </div>
+</div>
+
+<!-- ======================= 상단 바 ======================= -->
+<div class="topbar">
+  <div class="topbar__inner">
+    <span class="topbar__user">🍳 <b id="userName">손님</b>님, 안녕하세요</span>
+    <button class="topbar__logout" id="logoutBtn" type="button">로그아웃</button>
+  </div>
+</div>
+
+<!-- ======================= 헤더 ======================= -->
+<header class="header">
+  <div class="header__inner">
+    <div class="logo">
+      <span class="logo__mark">🍳</span>
+      <span class="logo__text">
+        <span class="logo__name">상호상회</span>
+        <span class="logo__sub">Kitchen Market</span>
+      </span>
+    </div>
+
+    <div class="search">
+      <span class="search__icon">🔍</span>
+      <label class="sr-only" for="searchInput">상품 검색</label>
+      <input class="search__input" type="search" id="searchInput"
+             placeholder="찾으시는 주방용품을 검색해 보세요">
+    </div>
+
+    <div class="header__actions">
+      <button class="icon-btn" id="wishBtn" type="button">
+        <span class="icon-btn__emoji">❤️</span>
+        <span class="label">찜</span>
+        <span class="badge" id="wishBadge" data-count="0">0</span>
+      </button>
+      <button class="icon-btn" id="cartBtn" type="button">
+        <span class="icon-btn__emoji">🛒</span>
+        <span class="label">장바구니</span>
+        <span class="badge" id="cartBadge" data-count="0">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ======================= 히어로 ======================= -->
+<section class="hero">
+  <div class="hero__inner">
+    <span class="hero__eyebrow">Since 1998 · 주방용품 전문</span>
+    <h2 class="hero__title">매일 쓰는 주방,<br><em>좋은 도구</em>로 채우세요</h2>
+    <p class="hero__desc">
+      상호상회가 직접 고른 주방용품을 합리적인 가격에 만나보세요.
+      냄비부터 칼, 도마, 식기까지 — 오늘도 전 품목 할인 중입니다.
+    </p>
+    <div class="hero__stats">
+      <div class="hero__stat"><b id="statCount">30</b><span>특가 상품</span></div>
+      <div class="hero__stat"><b id="statDiscount">50%</b><span>최대 할인</span></div>
+      <div class="hero__stat"><b>5만원</b><span>이상 무료배송</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 본문 ======================= -->
+<main class="main" id="listTop">
+  <div class="section-head">
+    <div>
+      <h2 class="section-head__title" id="listTitle">오늘의 주방 특가</h2>
+      <p class="section-head__sub">하트를 눌러 찜하고, 마음에 들면 장바구니에 담아보세요.</p>
+    </div>
+    <p class="result-count" id="resultCount">총 <b>30</b>개 상품</p>
+  </div>
+
+  <div class="toolbar">
+    <div class="chips" id="chips"><!-- JS가 카테고리 칩을 생성합니다 --></div>
+    <label class="sr-only" for="sortSelect">정렬 기준</label>
+    <select class="sort" id="sortSelect">
+      <option value="recommend">추천순</option>
+      <option value="discount">할인율 높은순</option>
+      <option value="priceAsc">낮은 가격순</option>
+      <option value="priceDesc">높은 가격순</option>
+      <option value="rating">평점순</option>
+    </select>
+  </div>
+
+  <div class="grid" id="grid"><!-- JS가 상품 카드를 생성합니다 --></div>
+</main>
+
+<!-- ======================= 푸터 ======================= -->
+<footer class="footer">
+  <div class="footer__inner">
+    <div>
+      <p class="footer__name">상호상회</p>
+      <p>매일 쓰는 주방용품을 가장 정직한 가격에.<br>1998년부터 한 자리에서.</p>
+    </div>
+    <div>
+      <h4>고객센터</h4>
+      <p>1588-0000</p>
+      <p>평일 09:00 – 18:00 (점심 12:00 – 13:00)</p>
+      <p>주말 · 공휴일 휴무</p>
+    </div>
+    <div>
+      <h4>쇼핑 안내</h4>
+      <ul>
+        <li>5만원 이상 구매 시 무료배송</li>
+        <li>오후 2시 이전 주문 당일 출고</li>
+        <li>수령 후 7일 이내 교환 · 환불</li>
+      </ul>
+    </div>
+    <div>
+      <h4>상점 정보</h4>
+      <p>상호 : 상호상회</p>
+      <p>이메일 : help@sanghosanghoe.example</p>
+      <p>주소 : 서울특별시 중구 주방로 11</p>
+    </div>
+  </div>
+  <div class="footer__bottom">
+    본 사이트는 포트폴리오 · 학습용 데모입니다. 실제 결제와 배송은 이루어지지 않습니다.<br>
+    상품 이미지는 Unsplash / StockSnap / Rawpixel 의 자유 이용 라이선스 이미지를 링크로 사용했습니다.<br>
+    © 2026 상호상회 (Sangho Market). Demo project.
+  </div>
+</footer>
+
+<!-- ======================= 드로어 : 찜 목록 ======================= -->
+<aside class="drawer" id="wishDrawer" aria-label="찜한 상품">
+  <div class="drawer__head">
+    <h3 class="drawer__title">찜한 상품 <span id="wishCountLabel">0</span></h3>
+    <button class="drawer__close" type="button" aria-label="닫기">✕</button>
+  </div>
+  <div class="drawer__body" id="wishBody"></div>
+  <div class="drawer__foot">
+    <button class="btn-primary" id="viewWishAll" type="button">찜한 상품만 모아보기</button>
+  </div>
+</aside>
+
+<!-- ======================= 드로어 : 장바구니 ======================= -->
+<aside class="drawer" id="cartDrawer" aria-label="장바구니">
+  <div class="drawer__head">
+    <h3 class="drawer__title">장바구니 <span id="cartCountLabel">0</span></h3>
+    <button class="drawer__close" type="button" aria-label="닫기">✕</button>
+  </div>
+  <div class="drawer__body" id="cartBody"></div>
+  <div class="drawer__foot">
+    <div class="sumline"><span>상품 금액</span><span id="sumList">0원</span></div>
+    <div class="sumline sumline--save"><span>할인 금액</span><span id="sumSave">-0원</span></div>
+    <div class="sumline"><span>배송비</span><span id="sumShip">무료</span></div>
+    <div class="sumline sumline--total"><span>결제 예정 금액</span><span id="sumTotal"><b>0</b>원</span></div>
+    <p class="sumline" id="shipNote" style="font-size:12px;color:var(--copper-dark);justify-content:center;margin-bottom:12px"></p>
+    <button class="btn-primary" id="checkoutBtn" type="button">주문하기</button>
+  </div>
+</aside>
+
+<div class="scrim" id="scrim"></div>
+<div class="toasts" id="toasts"></div>
+
+<script src="products.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
