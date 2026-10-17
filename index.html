@@ -11,42 +11,24 @@
 </head>
 <body>
 
-<!-- ======================= 로그인 게이트 ======================= -->
-<div class="gate" id="gate" hidden>
-  <div class="gate__card">
-    <div class="gate__brand">
-      <div class="gate__mark">🍳</div>
-      <h1 class="gate__name">상호상회</h1>
-      <p class="gate__tag">Sangho Kitchen Market</p>
-    </div>
-
-    <form id="loginForm" novalidate>
-      <div class="field">
-        <label class="field__label" for="loginId">아이디</label>
-        <input class="field__input" type="text" id="loginId" name="id"
-               placeholder="아이디를 입력하세요" autocomplete="username" spellcheck="false">
-      </div>
-      <div class="field">
-        <label class="field__label" for="loginPw">비밀번호</label>
-        <input class="field__input" type="password" id="loginPw" name="password"
-               placeholder="비밀번호를 입력하세요" autocomplete="current-password">
-      </div>
-      <p class="gate__error" id="loginError" role="alert"></p>
-      <button class="btn-primary" type="submit">로그인하고 쇼핑 시작</button>
-    </form>
-
-    <p class="gate__hint">
-      데모 상점입니다. <b>아이디와 비밀번호를 아무거나</b> 입력하면<br>
-      바로 입장할 수 있어요. (입력값은 이 브라우저에만 저장됩니다)
-    </p>
-  </div>
-</div>
-
 <!-- ======================= 상단 바 ======================= -->
 <div class="topbar">
   <div class="topbar__inner">
-    <span class="topbar__user">🍳 <b id="userName">손님</b>님, 안녕하세요</span>
-    <button class="topbar__logout" id="logoutBtn" type="button">로그아웃</button>
+    <span class="topbar__msg" id="topbarMsg">🍳 5만원 이상 무료배송 · 오후 2시 이전 주문 당일 출고</span>
+
+    <!-- 비로그인 상태 -->
+    <span class="topbar__auth" id="topbarGuest">
+      <button class="topbar__link" type="button" data-auth-open="login">로그인</button>
+      <span class="topbar__sep">·</span>
+      <button class="topbar__link" type="button" data-auth-open="signup">회원가입</button>
+    </span>
+
+    <!-- 로그인 상태 -->
+    <span class="topbar__auth" id="topbarUser" hidden>
+      <b id="userName">손님</b>님, 안녕하세요
+      <span class="topbar__sep">·</span>
+      <button class="topbar__link" id="logoutBtn" type="button">로그아웃</button>
+    </span>
   </div>
 </div>
 
@@ -79,6 +61,10 @@
         <span class="label">장바구니</span>
         <span class="badge" id="cartBadge" data-count="0">0</span>
       </button>
+      <button class="icon-btn icon-btn--accent" id="headerAuthBtn" type="button" data-auth-open="login">
+        <span class="icon-btn__emoji">👤</span>
+        <span class="label">로그인</span>
+      </button>
     </div>
   </div>
 </header>
@@ -90,7 +76,7 @@
     <h2 class="hero__title">매일 쓰는 주방,<br><em>좋은 도구</em>로 채우세요</h2>
     <p class="hero__desc">
       상호상회가 직접 고른 주방용품을 합리적인 가격에 만나보세요.
-      냄비부터 칼, 도마, 식기까지 — 오늘도 전 품목 할인 중입니다.
+      회원가입 없이 둘러보고, 비회원으로도 주문하실 수 있습니다.
     </p>
     <div class="hero__stats">
       <div class="hero__stat"><b id="statCount">30</b><span>특가 상품</span></div>
@@ -144,6 +130,7 @@
         <li>5만원 이상 구매 시 무료배송</li>
         <li>오후 2시 이전 주문 당일 출고</li>
         <li>수령 후 7일 이내 교환 · 환불</li>
+        <li>회원가입 없이 비회원 주문 가능</li>
       </ul>
     </div>
     <div>
@@ -155,7 +142,8 @@
   </div>
   <div class="footer__bottom">
     본 사이트는 포트폴리오 · 학습용 데모입니다. 실제 결제와 배송은 이루어지지 않습니다.<br>
-    상품 이미지는 Unsplash / StockSnap / Rawpixel 의 자유 이용 라이선스 이미지를 링크로 사용했습니다.<br>
+    회원 정보 · 주문 내역은 서버로 전송되지 않고 이 브라우저에만 저장됩니다.<br>
+    상품 이미지는 StockSnap · Rawpixel · Unsplash 의 자유 이용 라이선스 이미지를 링크로 사용했습니다.<br>
     © 2026 상호상회 (Sangho Market). Demo project.
   </div>
 </footer>
@@ -184,10 +172,140 @@
     <div class="sumline sumline--save"><span>할인 금액</span><span id="sumSave">-0원</span></div>
     <div class="sumline"><span>배송비</span><span id="sumShip">무료</span></div>
     <div class="sumline sumline--total"><span>결제 예정 금액</span><span id="sumTotal"><b>0</b>원</span></div>
-    <p class="sumline" id="shipNote" style="font-size:12px;color:var(--copper-dark);justify-content:center;margin-bottom:12px"></p>
+    <p class="shipnote" id="shipNote"></p>
     <button class="btn-primary" id="checkoutBtn" type="button">주문하기</button>
+    <p class="drawer__note" id="checkoutNote">로그인 없이 비회원으로도 주문할 수 있어요.</p>
   </div>
 </aside>
+
+<!-- ======================= 모달 : 로그인 / 회원가입 ======================= -->
+<div class="modal" id="authModal" hidden>
+  <div class="modal__backdrop" data-modal-close></div>
+  <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <button class="modal__close" type="button" data-modal-close aria-label="닫기">✕</button>
+
+    <div class="gate__brand">
+      <div class="gate__mark">🍳</div>
+      <h2 class="gate__name" id="authTitle">상호상회</h2>
+      <p class="gate__tag">Sangho Kitchen Market</p>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab is-active" id="tabLogin" type="button" role="tab" data-tab="login">로그인</button>
+      <button class="tab" id="tabSignup" type="button" role="tab" data-tab="signup">회원가입</button>
+    </div>
+
+    <!-- 로그인 -->
+    <form id="loginForm" class="authpane" novalidate>
+      <div class="field">
+        <label class="field__label" for="loginId">아이디</label>
+        <input class="field__input" type="text" id="loginId"
+               placeholder="아이디를 입력하세요" autocomplete="username" spellcheck="false">
+      </div>
+      <div class="field">
+        <label class="field__label" for="loginPw">비밀번호</label>
+        <input class="field__input" type="password" id="loginPw"
+               placeholder="비밀번호를 입력하세요" autocomplete="current-password">
+      </div>
+      <p class="gate__error" id="loginError" role="alert"></p>
+      <button class="btn-primary" type="submit">로그인</button>
+      <p class="gate__hint">
+        체험용 계정 — 아이디 <b>guest</b> / 비밀번호 <b>1234</b><br>
+        처음이시라면 <button class="linkbtn" type="button" data-tab-go="signup">회원가입</button>을 해주세요.
+      </p>
+    </form>
+
+    <!-- 회원가입 -->
+    <form id="signupForm" class="authpane" novalidate hidden>
+      <div class="field">
+        <label class="field__label" for="signupId">아이디</label>
+        <input class="field__input" type="text" id="signupId"
+               placeholder="3자 이상 입력하세요" autocomplete="username" spellcheck="false">
+      </div>
+      <div class="field">
+        <label class="field__label" for="signupPw">비밀번호</label>
+        <input class="field__input" type="password" id="signupPw"
+               placeholder="4자 이상 입력하세요" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label class="field__label" for="signupPw2">비밀번호 확인</label>
+        <input class="field__input" type="password" id="signupPw2"
+               placeholder="비밀번호를 한 번 더 입력하세요" autocomplete="new-password">
+      </div>
+      <p class="gate__error" id="signupError" role="alert"></p>
+      <button class="btn-primary" type="submit">가입하고 바로 시작</button>
+      <p class="gate__hint">
+        아이디와 비밀번호만 있으면 가입됩니다.<br>
+        입력하신 정보는 서버로 전송되지 않고 <b>이 브라우저에만</b> 저장됩니다.
+      </p>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= 모달 : 주문 방식 선택 ======================= -->
+<div class="modal" id="orderModal" hidden>
+  <div class="modal__backdrop" data-modal-close></div>
+  <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="orderTitle">
+    <button class="modal__close" type="button" data-modal-close aria-label="닫기">✕</button>
+
+    <!-- 1단계 : 주문 방식 선택 -->
+    <div id="orderChoice">
+      <h2 class="modal__title" id="orderTitle">어떻게 주문하시겠어요?</h2>
+      <p class="modal__desc">
+        결제 예정 금액 <b id="orderAmount">0원</b><br>
+        회원으로 주문하시면 주문 내역이 계정에 저장됩니다.
+      </p>
+      <div class="choice">
+        <button class="choice__btn choice__btn--primary" type="button" data-auth-open="login">
+          <span class="choice__icon">👤</span>
+          <span class="choice__text"><b>로그인하고 주문</b><small>이미 회원이신 경우</small></span>
+        </button>
+        <button class="choice__btn" type="button" data-auth-open="signup">
+          <span class="choice__icon">✨</span>
+          <span class="choice__text"><b>회원가입하고 주문</b><small>주문 내역이 저장돼요</small></span>
+        </button>
+        <button class="choice__btn" type="button" id="guestOrderBtn">
+          <span class="choice__icon">🛍️</span>
+          <span class="choice__text"><b>비회원으로 주문</b><small>가입 없이 바로 주문</small></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2단계 : 비회원 주문 정보 -->
+    <form id="guestForm" novalidate hidden>
+      <h2 class="modal__title">비회원 주문</h2>
+      <p class="modal__desc">배송에 필요한 정보만 입력해 주세요.</p>
+      <div class="field">
+        <label class="field__label" for="guestName">받는 분</label>
+        <input class="field__input" type="text" id="guestName" placeholder="이름을 입력하세요">
+      </div>
+      <div class="field">
+        <label class="field__label" for="guestPhone">연락처</label>
+        <input class="field__input" type="tel" id="guestPhone" placeholder="010-0000-0000" inputmode="tel">
+      </div>
+      <p class="gate__error" id="guestError" role="alert"></p>
+      <button class="btn-primary" type="submit">비회원으로 주문하기</button>
+      <p class="gate__hint">
+        비회원 주문은 <b>주문번호</b>로 조회합니다. 주문 완료 후 번호를 꼭 저장해 주세요.
+      </p>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= 모달 : 주문 완료 ======================= -->
+<div class="modal" id="doneModal" hidden>
+  <div class="modal__backdrop" data-modal-close></div>
+  <div class="modal__card modal__card--center" role="dialog" aria-modal="true">
+    <div class="done__icon">🧾</div>
+    <h2 class="modal__title">주문이 접수되었습니다</h2>
+    <p class="modal__desc" id="doneDesc"></p>
+    <div class="done__order">
+      <span>주문번호</span>
+      <b id="doneOrderNo">—</b>
+    </div>
+    <button class="btn-primary" type="button" data-modal-close>확인</button>
+  </div>
+</div>
 
 <div class="scrim" id="scrim"></div>
 <div class="toasts" id="toasts"></div>

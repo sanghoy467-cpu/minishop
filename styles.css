@@ -60,27 +60,55 @@ input{ font-family:inherit; }
   overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
 }
 
-/* ============================ 로그인 게이트 ============================ */
+/* ============================ 모달 (로그인·회원가입·주문) ============================ */
 
-.gate{
+.modal{
   position:fixed; inset:0; z-index:200;
   display:grid; place-items:center;
   padding:24px;
-  background-color:#2a2320;
-  background-image:linear-gradient(rgba(28,22,18,.72), rgba(28,22,18,.84)), var(--kitchen);
+  overflow-y:auto;
+}
+.modal[hidden]{ display:none !important; }
+
+.modal__backdrop{
+  position:absolute; inset:0;
+  background-color:rgba(28,22,18,.78);
+  background-image:linear-gradient(rgba(28,22,18,.72), rgba(28,22,18,.86)), var(--kitchen);
   background-size:cover;
   background-position:center;
+  animation:fadeIn .25s ease both;
 }
-.gate[hidden]{ display:none !important; }
 
-.gate__card{
+@keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
+
+.modal__card{
+  position:relative;
   width:min(420px,100%);
+  margin:auto;
   background:var(--surface);
   border-radius:22px;
-  padding:38px 34px 30px;
+  padding:34px 32px 28px;
   box-shadow:var(--shadow-lg);
-  animation:riseIn .5s cubic-bezier(.2,.8,.3,1) both;
+  animation:riseIn .4s cubic-bezier(.2,.8,.3,1) both;
 }
+.modal__card--center{ text-align:center; }
+
+.modal__close{
+  position:absolute; top:13px; right:13px;
+  width:32px; height:32px; display:grid; place-items:center;
+  font-size:17px; color:var(--ink-faint);
+  border-radius:9px; transition:background .16s, color .16s;
+}
+.modal__close:hover{ background:var(--surface-2); color:var(--ink); }
+
+.modal__title{
+  margin:0 0 9px; font-family:var(--serif);
+  font-size:22px; font-weight:700; letter-spacing:.02em;
+}
+.modal__desc{
+  margin:0 0 20px; font-size:13.5px; line-height:1.7; color:var(--ink-soft);
+}
+.modal__desc b{ color:var(--copper-dark); }
 
 @keyframes riseIn{
   from{ opacity:0; transform:translateY(18px) scale(.985); }
@@ -143,11 +171,80 @@ input{ font-family:inherit; }
 
 .gate__hint{
   margin:16px 0 0; padding:11px 13px;
-  font-size:12px; line-height:1.65; color:var(--ink-soft);
+  font-size:12px; line-height:1.75; color:var(--ink-soft);
   background:var(--surface-2); border:1px dashed var(--line-strong);
   border-radius:var(--radius-sm); text-align:center;
 }
 .gate__hint b{ color:var(--copper-dark); }
+
+.linkbtn{
+  font-size:12px; font-weight:700; color:var(--copper-dark);
+  text-decoration:underline; text-underline-offset:3px; padding:0;
+}
+.linkbtn:hover{ color:var(--copper); }
+
+/* ---------- 로그인 / 회원가입 탭 ---------- */
+
+.tabs{
+  display:flex; gap:4px; margin-bottom:22px;
+  padding:4px; background:var(--surface-2);
+  border:1px solid var(--line); border-radius:999px;
+}
+.tab{
+  flex:1; padding:10px; border-radius:999px;
+  font-size:13.5px; font-weight:700; color:var(--ink-soft);
+  transition:background .2s, color .2s, box-shadow .2s;
+}
+.tab:hover{ color:var(--ink); }
+.tab.is-active{
+  color:#fff; background:var(--charcoal);
+  box-shadow:0 2px 6px rgba(42,35,32,.22);
+}
+
+.authpane[hidden]{ display:none !important; }
+
+/* ---------- 주문 방식 선택 ---------- */
+
+.choice{ display:flex; flex-direction:column; gap:10px; }
+
+.choice__btn{
+  display:flex; align-items:center; gap:13px;
+  padding:15px 17px; text-align:left;
+  background:var(--surface-2);
+  border:1.5px solid var(--line);
+  border-radius:var(--radius-sm);
+  transition:border-color .18s, background .18s, transform .14s;
+}
+.choice__btn:hover{
+  border-color:var(--copper); background:var(--copper-soft);
+}
+.choice__btn:active{ transform:translateY(1px); }
+.choice__btn--primary{
+  border-color:var(--copper); background:var(--copper-soft);
+}
+
+.choice__icon{ font-size:23px; flex-shrink:0; }
+.choice__text{ display:flex; flex-direction:column; gap:2px; }
+.choice__text b{ font-size:14.5px; font-weight:700; }
+.choice__text small{ font-size:12px; color:var(--ink-faint); }
+
+/* ---------- 주문 완료 ---------- */
+
+.done__icon{ font-size:46px; margin-bottom:12px; }
+
+.done__order{
+  display:flex; flex-direction:column; gap:4px;
+  padding:15px; margin-bottom:20px;
+  background:var(--surface-2);
+  border:1px dashed var(--line-strong);
+  border-radius:var(--radius-sm);
+}
+.done__order span{
+  font-size:11.5px; font-weight:700; letter-spacing:.11em; color:var(--ink-faint);
+}
+.done__order b{
+  font-size:21px; font-weight:800; letter-spacing:.04em; color:var(--copper-dark);
+}
 
 /* ============================ 헤더 ============================ */
 
@@ -159,12 +256,16 @@ input{ font-family:inherit; }
   max-width:1240px; margin:0 auto; padding:7px 22px;
   display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap;
 }
-.topbar__user b{ color:#fff; }
-.topbar__logout{
-  font-size:12px; color:#c6b9a9; text-decoration:underline;
+.topbar__msg{ color:#c6b9a9; }
+.topbar__auth{ display:flex; align-items:center; gap:7px; }
+.topbar__auth[hidden]{ display:none !important; }
+.topbar__auth b{ color:#fff; }
+.topbar__sep{ color:#6d6056; }
+.topbar__link{
+  font-size:12px; color:#e9e0d4; text-decoration:underline;
   text-underline-offset:3px; transition:color .15s;
 }
-.topbar__logout:hover{ color:#fff; }
+.topbar__link:hover{ color:#fff; }
 
 .header{
   position:sticky; top:0; z-index:60;
@@ -224,6 +325,15 @@ input{ font-family:inherit; }
 .icon-btn:hover{ border-color:var(--copper); background:var(--copper-soft); }
 .icon-btn:active{ transform:translateY(1px); }
 .icon-btn__emoji{ font-size:15px; }
+
+.icon-btn--accent{
+  color:#fff; border-color:var(--copper-dark);
+  background:linear-gradient(145deg,var(--copper),var(--copper-dark));
+}
+.icon-btn--accent:hover{
+  border-color:var(--copper-dark); filter:brightness(1.07);
+  background:linear-gradient(145deg,var(--copper),var(--copper-dark));
+}
 
 .badge{
   min-width:19px; height:19px; padding:0 5px;
@@ -545,6 +655,15 @@ input{ font-family:inherit; }
   font-size:16px; font-weight:800; color:var(--ink);
 }
 .sumline--total b{ font-size:22px; color:var(--copper-dark); }
+
+.shipnote{
+  margin:0 0 13px; text-align:center;
+  font-size:12px; font-weight:600; color:var(--copper-dark);
+}
+.drawer__note{
+  margin:10px 0 0; text-align:center;
+  font-size:11.5px; color:var(--ink-faint);
+}
 
 /* ============================ 토스트 ============================ */
 

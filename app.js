@@ -1,20 +1,26 @@
 /* =========================================================
    상호상회 — 애플리케이션 로직
-   로그인 / 상품 목록 / 찜하기 / 장바구니
-   모든 상태는 브라우저 localStorage 에 저장됩니다.
+
+   · 사이트는 로그인 없이 누구나 둘러볼 수 있습니다.
+   · 찜 / 장바구니도 비회원 상태에서 그대로 쓸 수 있습니다.
+   · 로그인은 주문 단계에서만 선택적으로 요구하며,
+     로그인 대신 "비회원 주문"으로도 주문을 마칠 수 있습니다.
+   · 회원 정보와 주문 내역은 서버 없이 localStorage 에만 저장됩니다.
    ========================================================= */
 
 (function () {
   'use strict';
 
   // ------------------------------------------------------- 저장소 키
-  var KEY_USER = 'sangho.user';
-  var KEY_WISH = 'sangho.wish';
-  var KEY_CART = 'sangho.cart';
+  var KEY_USER   = 'sangho.user';    // 현재 로그인한 사용자
+  var KEY_USERS  = 'sangho.users';   // 가입한 회원 목록
+  var KEY_WISH   = 'sangho.wish';
+  var KEY_CART   = 'sangho.cart';
+  var KEY_ORDERS = 'sangho.orders';
 
   // ------------------------------------------------------- 상태
   var state = {
-    user: null,
+    user: null,        // null 이면 비회원(둘러보기) 상태
     wish: [],          // [productId, ...]
     cart: [],          // [{ id, qty }, ...]
     category: '전체',
@@ -38,6 +44,10 @@
 
   function save(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* 저장 불가 환경 무시 */ }
+  }
+
+  function remove(key) {
+    try { localStorage.removeItem(key); } catch (e) { /* noop */ }
   }
 
   function won(n) {
@@ -94,80 +104,203 @@
   }
 
   /* =======================================================
-     로그인
-     아이디와 비밀번호를 입력하기만 하면 통과합니다.
-     (데모용 — 실제 인증 서버 없이 브라우저에만 기록)
+     모달 공통
      ======================================================= */
 
-  function initAuth() {
-    var gate = $('#gate');
-    var form = $('#loginForm');
-    var idInput = $('#loginId');
-    var pwInput = $('#loginPw');
-    var errorBox = $('#loginError');
+  function openModal(id) {
+    closeModals();
+    $('#' + id).hidden = false;
+    document.body.classList.add('is-locked');
+  }
 
-    state.user = load(KEY_USER, null);
+  function closeModals() {
+    $$('.modal').forEach(function (m) { m.hidden = true; });
+    if (!$$('.drawer.is-open').length) document.body.classList.remove('is-locked');
+  }
 
-    if (state.user) {
-      openShop();
-    } else {
-      gate.hidden = false;
-      document.body.classList.add('is-locked');
-      setTimeout(function () { idInput.focus(); }, 120);
+  /* =======================================================
+     회원 관리 (회원가입 / 로그인 / 로그아웃)
+
+     데모용이라 비밀번호를 평문으로 저장합니다.
+     실제 서비스라면 서버에서 해시하여 보관해야 합니다.
+     ======================================================= */
+
+  /** 가입 회원이 하나도 없으면 체험용 계정을 하나 만들어 둡니다. */
+  function seedDemoUser() {
+    var users = load(KEY_USERS, null);
+    if (!users || !users.length) {
+      save(KEY_USERS, [{ id: 'guest', pw: '1234', joined: new Date().toISOString() }]);
     }
+  }
 
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var id = idInput.value.trim();
-      var pw = pwInput.value;
+  function getUsers() { return load(KEY_USERS, []); }
 
-      if (!id) {
-        errorBox.textContent = '아이디를 입력해 주세요.';
-        idInput.focus();
-        return;
-      }
-      if (!pw) {
-        errorBox.textContent = '비밀번호를 입력해 주세요.';
-        pwInput.focus();
-        return;
-      }
-      if (pw.length < 2) {
-        errorBox.textContent = '비밀번호는 2자 이상 입력해 주세요.';
-        pwInput.focus();
-        return;
-      }
+  function findUser(id) {
+    var users = getUsers();
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].id.toLowerCase() === id.toLowerCase()) return users[i];
+    }
+    return null;
+  }
 
-      errorBox.textContent = '';
-      state.user = { id: id, since: new Date().toISOString() };
-      save(KEY_USER, state.user);
+  function signIn(user, welcomeMessage) {
+    state.user = { id: user.id, since: new Date().toISOString() };
+    save(KEY_USER, state.user);
+    renderAuthBar();
+    closeModals();
+    toast(welcomeMessage || (user.id + '님, 환영합니다'), '🍳');
 
-      gate.hidden = true;
-      document.body.classList.remove('is-locked');
-      openShop();
-      toast(id + '님, 상호상회에 오신 것을 환영합니다', '🍳');
+    // 주문하려다 로그인한 경우라면 그대로 주문을 이어서 진행합니다.
+    if (pendingCheckout) {
+      pendingCheckout = false;
+      setTimeout(placeOrder, 420);
+    }
+  }
+
+  function initAuth() {
+    seedDemoUser();
+    state.user = load(KEY_USER, null);
+    renderAuthBar();
+
+    // --- 탭 전환 ---
+    $$('[data-tab]').forEach(function (btn) {
+      btn.addEventListener('click', function () { switchTab(btn.dataset.tab); });
+    });
+    $$('[data-tab-go]').forEach(function (btn) {
+      btn.addEventListener('click', function () { switchTab(btn.dataset.tabGo); });
     });
 
+    // --- 로그인 ---
+    $('#loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var id = $('#loginId').value.trim();
+      var pw = $('#loginPw').value;
+      var err = $('#loginError');
+
+      if (!id) { err.textContent = '아이디를 입력해 주세요.'; $('#loginId').focus(); return; }
+      if (!pw) { err.textContent = '비밀번호를 입력해 주세요.'; $('#loginPw').focus(); return; }
+
+      var user = findUser(id);
+      if (!user) {
+        err.innerHTML = '가입되지 않은 아이디입니다. 회원가입을 먼저 해주세요.';
+        $('#loginId').focus();
+        return;
+      }
+      if (user.pw !== pw) {
+        err.textContent = '비밀번호가 일치하지 않습니다.';
+        $('#loginPw').select();
+        return;
+      }
+
+      err.textContent = '';
+      $('#loginPw').value = '';
+      signIn(user, user.id + '님, 상호상회에 오신 것을 환영합니다');
+    });
+
+    // --- 회원가입 ---
+    $('#signupForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var id  = $('#signupId').value.trim();
+      var pw  = $('#signupPw').value;
+      var pw2 = $('#signupPw2').value;
+      var err = $('#signupError');
+
+      if (id.length < 3) {
+        err.textContent = '아이디는 3자 이상 입력해 주세요.';
+        $('#signupId').focus(); return;
+      }
+      if (/\s/.test(id)) {
+        err.textContent = '아이디에는 공백을 쓸 수 없습니다.';
+        $('#signupId').focus(); return;
+      }
+      if (findUser(id)) {
+        err.textContent = '이미 사용 중인 아이디입니다.';
+        $('#signupId').select(); return;
+      }
+      if (pw.length < 4) {
+        err.textContent = '비밀번호는 4자 이상 입력해 주세요.';
+        $('#signupPw').focus(); return;
+      }
+      if (pw !== pw2) {
+        err.textContent = '비밀번호가 서로 일치하지 않습니다.';
+        $('#signupPw2').select(); return;
+      }
+
+      var users = getUsers();
+      var user = { id: id, pw: pw, joined: new Date().toISOString() };
+      users.push(user);
+      save(KEY_USERS, users);
+
+      err.textContent = '';
+      $('#signupPw').value = '';
+      $('#signupPw2').value = '';
+      signIn(user, '가입 완료! ' + id + '님 환영합니다');
+    });
+
+    // --- 로그아웃 ---
     $('#logoutBtn').addEventListener('click', function () {
       state.user = null;
-      try { localStorage.removeItem(KEY_USER); } catch (e) { /* noop */ }
-      closeDrawers();
-      idInput.value = '';
-      pwInput.value = '';
-      errorBox.textContent = '';
-      gate.hidden = false;
-      document.body.classList.add('is-locked');
-      idInput.focus();
+      remove(KEY_USER);
+      renderAuthBar();
+      toast('로그아웃되었습니다. 둘러보기는 계속 가능해요', '👋');
+    });
+
+    // --- 모달 열기 버튼 (헤더 / 상단바 / 주문 선택지) ---
+    $$('[data-auth-open]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        openAuth(btn.dataset.authOpen);
+      });
+    });
+
+    // --- 모달 닫기 ---
+    $$('[data-modal-close]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        pendingCheckout = false;
+        closeModals();
+      });
     });
   }
 
-  function openShop() {
-    $('#userName').textContent = state.user.id;
-    state.wish = load(KEY_WISH, []);
-    state.cart = load(KEY_CART, []);
-    render();
-    renderWish();
-    renderCart();
-    updateBadges();
+  function openAuth(tab) {
+    switchTab(tab || 'login');
+    openModal('authModal');
+    setTimeout(function () {
+      $(tab === 'signup' ? '#signupId' : '#loginId').focus();
+    }, 140);
+  }
+
+  function switchTab(tab) {
+    var isSignup = tab === 'signup';
+    $('#tabLogin').classList.toggle('is-active', !isSignup);
+    $('#tabSignup').classList.toggle('is-active', isSignup);
+    $('#loginForm').hidden = isSignup;
+    $('#signupForm').hidden = !isSignup;
+    $('#loginError').textContent = '';
+    $('#signupError').textContent = '';
+  }
+
+  /** 상단바 · 헤더의 로그인 상태 표시를 갱신합니다. */
+  function renderAuthBar() {
+    var signedIn = !!state.user;
+
+    $('#topbarGuest').hidden = signedIn;
+    $('#topbarUser').hidden = !signedIn;
+    if (signedIn) $('#userName').textContent = state.user.id;
+
+    var btn = $('#headerAuthBtn');
+    if (signedIn) {
+      btn.querySelector('.label').textContent = state.user.id;
+      btn.querySelector('.icon-btn__emoji').textContent = '🍳';
+      btn.classList.remove('icon-btn--accent');
+    } else {
+      btn.querySelector('.label').textContent = '로그인';
+      btn.querySelector('.icon-btn__emoji').textContent = '👤';
+      btn.classList.add('icon-btn--accent');
+    }
+
+    $('#checkoutNote').textContent = signedIn
+      ? state.user.id + '님 계정으로 주문합니다.'
+      : '로그인 없이 비회원으로도 주문할 수 있어요.';
   }
 
   /* =======================================================
@@ -264,7 +397,7 @@
   }
 
   /* =======================================================
-     찜하기
+     찜하기 (비회원도 사용 가능)
      ======================================================= */
 
   function toggleWish(id) {
@@ -317,7 +450,7 @@
   }
 
   /* =======================================================
-     장바구니
+     장바구니 (비회원도 사용 가능)
      ======================================================= */
 
   function addToCart(id) {
@@ -449,6 +582,107 @@
   }
 
   /* =======================================================
+     주문
+     로그인 상태면 바로 주문, 아니면 주문 방식을 먼저 고릅니다.
+     ======================================================= */
+
+  var pendingCheckout = false;   // 로그인 후 이어서 주문할지 여부
+
+  function startCheckout() {
+    if (!state.cart.length) {
+      toast('장바구니가 비어 있습니다', '🛒');
+      return;
+    }
+
+    if (state.user) {          // 회원 — 바로 주문
+      placeOrder();
+      return;
+    }
+
+    // 비회원 — 주문 방식 선택
+    pendingCheckout = true;
+    $('#orderChoice').hidden = false;
+    $('#guestForm').hidden = true;
+    $('#orderAmount').textContent = won(cartTotals().total) + '원';
+    closeDrawers();
+    openModal('orderModal');
+  }
+
+  function orderNumber() {
+    var d = new Date();
+    var ymd = String(d.getFullYear()).slice(2) +
+              ('0' + (d.getMonth() + 1)).slice(-2) +
+              ('0' + d.getDate()).slice(-2);
+    return 'SH' + ymd + '-' + String(Math.floor(Math.random() * 9000) + 1000);
+  }
+
+  /**
+   * 주문을 확정합니다.
+   * @param {{name:string, phone:string}=} guest 비회원 주문자 정보 (회원 주문이면 생략)
+   */
+  function placeOrder(guest) {
+    var t = cartTotals();
+    if (!t.count) { toast('장바구니가 비어 있습니다', '🛒'); return; }
+
+    var no = orderNumber();
+    var orders = load(KEY_ORDERS, []);
+    orders.push({
+      no: no,
+      at: new Date().toISOString(),
+      buyer: guest ? { type: 'guest', name: guest.name, phone: guest.phone }
+                   : { type: 'member', id: state.user.id },
+      items: state.cart.slice(),
+      total: t.total
+    });
+    save(KEY_ORDERS, orders);
+
+    // 장바구니 비우기
+    state.cart = [];
+    save(KEY_CART, state.cart);
+    pendingCheckout = false;
+    render();
+    renderCart();
+    updateBadges();
+    closeDrawers();
+
+    $('#doneDesc').innerHTML =
+      (guest ? escapeHtml(guest.name) + '님 (비회원 주문)' : escapeHtml(state.user.id) + '님') +
+      '<br>결제 예정 금액 <b>' + won(t.total) + '원</b>';
+    $('#doneOrderNo').textContent = no;
+    openModal('doneModal');
+  }
+
+  function initCheckout() {
+    $('#checkoutBtn').addEventListener('click', startCheckout);
+
+    // 비회원 주문 — 정보 입력 단계로
+    $('#guestOrderBtn').addEventListener('click', function () {
+      $('#orderChoice').hidden = true;
+      $('#guestForm').hidden = false;
+      setTimeout(function () { $('#guestName').focus(); }, 120);
+    });
+
+    // 비회원 주문 확정
+    $('#guestForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name  = $('#guestName').value.trim();
+      var phone = $('#guestPhone').value.trim();
+      var err   = $('#guestError');
+
+      if (!name) { err.textContent = '받는 분 이름을 입력해 주세요.'; $('#guestName').focus(); return; }
+      if (!phone) { err.textContent = '연락처를 입력해 주세요.'; $('#guestPhone').focus(); return; }
+      if (phone.replace(/[^0-9]/g, '').length < 9) {
+        err.textContent = '연락처를 정확히 입력해 주세요.';
+        $('#guestPhone').select(); return;
+      }
+
+      err.textContent = '';
+      closeModals();
+      placeOrder({ name: name, phone: phone });
+    });
+  }
+
+  /* =======================================================
      드로어 (찜 목록 / 장바구니)
      ======================================================= */
 
@@ -462,7 +696,7 @@
   function closeDrawers() {
     $$('.drawer').forEach(function (d) { d.classList.remove('is-open'); });
     $('#scrim').classList.remove('is-open');
-    if (!$('#gate').hidden) return;
+    if ($$('.modal:not([hidden])').length) return;   // 모달이 열려 있으면 스크롤 잠금 유지
     document.body.classList.remove('is-locked');
   }
 
@@ -520,7 +754,9 @@
     $$('.drawer__close').forEach(function (b) { b.addEventListener('click', closeDrawers); });
 
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeDrawers();
+      if (e.key !== 'Escape') return;
+      if ($$('.modal:not([hidden])').length) { pendingCheckout = false; closeModals(); }
+      else closeDrawers();
     });
 
     // 찜 목록 전체 보기
@@ -531,19 +767,6 @@
       closeDrawers();
       render();
       $('#listTop').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-
-    // 주문하기 (데모)
-    $('#checkoutBtn').addEventListener('click', function () {
-      if (!state.cart.length) { toast('장바구니가 비어 있습니다', '🛒'); return; }
-      var t = cartTotals();
-      toast('총 ' + won(t.total) + '원 주문이 접수되었습니다', '🧾');
-      state.cart = [];
-      save(KEY_CART, state.cart);
-      render();
-      renderCart();
-      updateBadges();
-      setTimeout(closeDrawers, 700);
     });
   }
 
@@ -570,9 +793,19 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     toastBox = $('#toasts');
+
+    state.wish = load(KEY_WISH, []);
+    state.cart = load(KEY_CART, []);
+
     initStats();
     initCategories();
     initEvents();
     initAuth();
+    initCheckout();
+
+    render();
+    renderWish();
+    renderCart();
+    updateBadges();
   });
 })();
