@@ -12,11 +12,13 @@
   'use strict';
 
   // ------------------------------------------------------- 저장소 키
-  var KEY_USER   = 'sangho.user';    // 현재 로그인한 사용자
-  var KEY_USERS  = 'sangho.users';   // 가입한 회원 목록
-  var KEY_WISH   = 'sangho.wish';
-  var KEY_CART   = 'sangho.cart';
-  var KEY_ORDERS = 'sangho.orders';
+  // 회원 / 주문은 Supabase 가 보관하고, 찜 / 장바구니만 이 브라우저에 둡니다.
+  var KEY_WISH  = 'sangho.wish';
+  var KEY_CART  = 'sangho.cart';
+
+  // 아래 두 키는 Supabase 연동 이전 버전이 쓰던 것으로, 첫 실행 때 정리합니다.
+  var KEY_USER  = 'sangho.user';
+  var KEY_USERS = 'sangho.users';
 
   // ------------------------------------------------------- 상태
   var state = {
@@ -121,31 +123,15 @@
   /* =======================================================
      회원 관리 (회원가입 / 로그인 / 로그아웃)
 
-     데모용이라 비밀번호를 평문으로 저장합니다.
-     실제 서비스라면 서버에서 해시하여 보관해야 합니다.
+     인증은 Supabase Auth 가 처리합니다 — 비밀번호는 이 브라우저에
+     저장되지 않고, 가입한 계정은 어느 기기에서나 쓸 수 있습니다.
+     이 상점은 이메일 대신 아이디로 가입하므로, supabase.js 에서
+     아이디를 내부 전용 주소로 변환해 Supabase 에 전달합니다.
      ======================================================= */
 
-  /** 가입 회원이 하나도 없으면 체험용 계정을 하나 만들어 둡니다. */
-  function seedDemoUser() {
-    var users = load(KEY_USERS, null);
-    if (!users || !users.length) {
-      save(KEY_USERS, [{ id: 'guest', pw: '1234', joined: new Date().toISOString() }]);
-    }
-  }
-
-  function getUsers() { return load(KEY_USERS, []); }
-
-  function findUser(id) {
-    var users = getUsers();
-    for (var i = 0; i < users.length; i++) {
-      if (users[i].id.toLowerCase() === id.toLowerCase()) return users[i];
-    }
-    return null;
-  }
-
-  function signIn(user, welcomeMessage) {
-    state.user = { id: user.id, since: new Date().toISOString() };
-    save(KEY_USER, state.user);
+  /** 로그인 성공 후 공통 처리 */
+  function signedIn(user, welcomeMessage) {
+    state.user = user;                       // { id, uid }
     renderAuthBar();
     closeModals();
     toast(welcomeMessage || (user.id + '님, 환영합니다'), '🍳');
@@ -153,14 +139,33 @@
     // 주문하려다 로그인한 경우라면 그대로 주문을 이어서 진행합니다.
     if (pendingCheckout) {
       pendingCheckout = false;
-      setTimeout(placeOrder, 420);
+      setTimeout(function () { placeOrder(); }, 420);
+    }
+  }
+
+  /** 제출 중에는 버튼을 잠가 중복 요청을 막습니다. */
+  function busy(form, on, label) {
+    var btn = form.querySelector('button[type="submit"]');
+    if (!btn) return;
+    if (on) {
+      btn.dataset.label = btn.textContent;
+      btn.textContent = label || '처리 중…';
+      btn.disabled = true;
+    } else {
+      btn.textContent = btn.dataset.label || btn.textContent;
+      btn.disabled = false;
     }
   }
 
   function initAuth() {
-    seedDemoUser();
-    state.user = load(KEY_USER, null);
-    renderAuthBar();
+    // 이전 버전에서 브라우저에만 저장하던 회원 정보는 더 이상 쓰지 않습니다.
+    remove(KEY_USERS);
+    remove(KEY_USER);
+
+    // 저장된 세션이 있으면 자동 로그인
+    DB.auth.current().then(function (user) {
+      if (user) { state.user = user; renderAuthBar(); }
+    });
 
     // --- 탭 전환 ---
     $$('[data-tab]').forEach(function (btn) {
@@ -173,33 +178,33 @@
     // --- 로그인 ---
     $('#loginForm').addEventListener('submit', function (e) {
       e.preventDefault();
+      var form = e.target;
       var id = $('#loginId').value.trim();
       var pw = $('#loginPw').value;
       var err = $('#loginError');
 
       if (!id) { err.textContent = '아이디를 입력해 주세요.'; $('#loginId').focus(); return; }
       if (!pw) { err.textContent = '비밀번호를 입력해 주세요.'; $('#loginPw').focus(); return; }
-
-      var user = findUser(id);
-      if (!user) {
-        err.innerHTML = '가입되지 않은 아이디입니다. 회원가입을 먼저 해주세요.';
-        $('#loginId').focus();
-        return;
-      }
-      if (user.pw !== pw) {
-        err.textContent = '비밀번호가 일치하지 않습니다.';
-        $('#loginPw').select();
-        return;
-      }
+      if (!DB.online) { err.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.'; return; }
 
       err.textContent = '';
-      $('#loginPw').value = '';
-      signIn(user, user.id + '님, 상호상회에 오신 것을 환영합니다');
+      busy(form, true, '로그인 중…');
+
+      DB.auth.signIn(id, pw).then(function (user) {
+        $('#loginPw').value = '';
+        busy(form, false);
+        signedIn(user, user.id + '님, 상호상회에 오신 것을 환영합니다');
+      }).catch(function (error) {
+        busy(form, false);
+        err.textContent = DB.describeError(error, '로그인에 실패했습니다.');
+        $('#loginPw').select();
+      });
     });
 
     // --- 회원가입 ---
     $('#signupForm').addEventListener('submit', function (e) {
       e.preventDefault();
+      var form = e.target;
       var id  = $('#signupId').value.trim();
       var pw  = $('#signupPw').value;
       var pw2 = $('#signupPw2').value;
@@ -209,41 +214,45 @@
         err.textContent = '아이디는 3자 이상 입력해 주세요.';
         $('#signupId').focus(); return;
       }
-      if (/\s/.test(id)) {
-        err.textContent = '아이디에는 공백을 쓸 수 없습니다.';
-        $('#signupId').focus(); return;
-      }
-      if (findUser(id)) {
-        err.textContent = '이미 사용 중인 아이디입니다.';
+      if (!/^[A-Za-z0-9._-]+$/.test(id)) {
+        err.textContent = '아이디는 영문·숫자와 . _ - 만 쓸 수 있습니다.';
         $('#signupId').select(); return;
       }
-      if (pw.length < 4) {
-        err.textContent = '비밀번호는 4자 이상 입력해 주세요.';
+      if (pw.length < 6) {
+        err.textContent = '비밀번호는 6자 이상 입력해 주세요.';
         $('#signupPw').focus(); return;
       }
       if (pw !== pw2) {
         err.textContent = '비밀번호가 서로 일치하지 않습니다.';
         $('#signupPw2').select(); return;
       }
-
-      var users = getUsers();
-      var user = { id: id, pw: pw, joined: new Date().toISOString() };
-      users.push(user);
-      save(KEY_USERS, users);
+      if (!DB.online) { err.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.'; return; }
 
       err.textContent = '';
-      $('#signupPw').value = '';
-      $('#signupPw2').value = '';
-      signIn(user, '가입 완료! ' + id + '님 환영합니다');
+      busy(form, true, '가입 중…');
+
+      DB.auth.signUp(id, pw).then(function (user) {
+        $('#signupPw').value = '';
+        $('#signupPw2').value = '';
+        busy(form, false);
+        signedIn(user, '가입 완료! ' + user.id + '님 환영합니다');
+      }).catch(function (error) {
+        busy(form, false);
+        err.textContent = DB.describeError(error, '회원가입에 실패했습니다.');
+      });
     });
 
     // --- 로그아웃 ---
     $('#logoutBtn').addEventListener('click', function () {
-      state.user = null;
-      remove(KEY_USER);
-      renderAuthBar();
-      toast('로그아웃되었습니다. 둘러보기는 계속 가능해요', '👋');
+      DB.auth.signOut().then(function () {
+        state.user = null;
+        renderAuthBar();
+        toast('로그아웃되었습니다. 둘러보기는 계속 가능해요', '👋');
+      });
     });
+
+    // --- 주문 내역 ---
+    $('#ordersBtn').addEventListener('click', showMyOrders);
 
     // --- 모달 열기 버튼 (헤더 / 상단바 / 주문 선택지) ---
     $$('[data-auth-open]').forEach(function (btn) {
@@ -297,6 +306,9 @@
       btn.querySelector('.icon-btn__emoji').textContent = '👤';
       btn.classList.add('icon-btn--accent');
     }
+
+    // 주문 내역은 로그인한 회원에게만 보여줍니다.
+    $('#ordersBtn').hidden = !signedIn;
 
     $('#checkoutNote').textContent = signedIn
       ? state.user.id + '님 계정으로 주문합니다.'
@@ -617,39 +629,99 @@
   }
 
   /**
-   * 주문을 확정합니다.
+   * 주문을 확정하고 Supabase 에 저장합니다.
    * @param {{name:string, phone:string}=} guest 비회원 주문자 정보 (회원 주문이면 생략)
    */
   function placeOrder(guest) {
     var t = cartTotals();
     if (!t.count) { toast('장바구니가 비어 있습니다', '🛒'); return; }
+    if (!guest && !state.user) { startCheckout(); return; }
+
+    // 주문 시점의 상품 정보를 함께 담아 둡니다.
+    // (나중에 가격이 바뀌어도 주문 내역은 그대로 보존됩니다)
+    var items = state.cart.map(function (row) {
+      var p = findProduct(row.id);
+      if (!p) return null;
+      return {
+        id: p.id, name: p.name, qty: row.qty,
+        price: p.price, discount: p.discount, paid: salePrice(p) * row.qty
+      };
+    }).filter(Boolean);
 
     var no = orderNumber();
-    var orders = load(KEY_ORDERS, []);
-    orders.push({
-      no: no,
-      at: new Date().toISOString(),
-      buyer: guest ? { type: 'guest', name: guest.name, phone: guest.phone }
-                   : { type: 'member', id: state.user.id },
-      items: state.cart.slice(),
-      total: t.total
+    var payload = guest
+      ? { order_no: no, user_id: null, buyer_type: 'guest',
+          buyer_name: guest.name, buyer_phone: guest.phone, items: items, total: t.total }
+      : { order_no: no, user_id: state.user.uid, buyer_type: 'member',
+          buyer_name: state.user.id, buyer_phone: null, items: items, total: t.total };
+
+    toast('주문을 접수하고 있습니다…', '⏳');
+
+    DB.orders.create(payload).then(function () {
+      // 주문이 실제로 저장된 뒤에만 장바구니를 비웁니다.
+      state.cart = [];
+      save(KEY_CART, state.cart);
+      pendingCheckout = false;
+      render();
+      renderCart();
+      updateBadges();
+      closeDrawers();
+
+      $('#doneDesc').innerHTML =
+        (guest ? escapeHtml(guest.name) + '님 (비회원 주문)' : escapeHtml(state.user.id) + '님') +
+        '<br>결제 예정 금액 <b>' + won(t.total) + '원</b>';
+      $('#doneOrderNo').textContent = no;
+      openModal('doneModal');
+    }).catch(function (error) {
+      pendingCheckout = false;
+      closeModals();
+      toast(DB.describeError(error, '주문 저장에 실패했습니다. 다시 시도해 주세요.'), '⚠️');
     });
-    save(KEY_ORDERS, orders);
+  }
 
-    // 장바구니 비우기
-    state.cart = [];
-    save(KEY_CART, state.cart);
-    pendingCheckout = false;
-    render();
-    renderCart();
-    updateBadges();
-    closeDrawers();
+  /* -------------------------------------------------------
+     주문 내역 (회원 전용 — RLS 로 본인 주문만 조회됩니다)
+     ------------------------------------------------------- */
 
-    $('#doneDesc').innerHTML =
-      (guest ? escapeHtml(guest.name) + '님 (비회원 주문)' : escapeHtml(state.user.id) + '님') +
-      '<br>결제 예정 금액 <b>' + won(t.total) + '원</b>';
-    $('#doneOrderNo').textContent = no;
-    openModal('doneModal');
+  function showMyOrders() {
+    if (!state.user) { openAuth('login'); return; }
+
+    $('#ordersBody').innerHTML =
+      '<p class="orders__loading">주문 내역을 불러오는 중…</p>';
+    openModal('ordersModal');
+
+    DB.orders.listMine().then(function (rows) {
+      if (!rows.length) {
+        $('#ordersBody').innerHTML =
+          '<div class="empty">' +
+            '<div class="empty__icon">🧾</div>' +
+            '<p class="empty__title">아직 주문 내역이 없습니다</p>' +
+            '<p class="empty__desc">마음에 드는 상품을 주문해 보세요.</p>' +
+          '</div>';
+        return;
+      }
+
+      $('#ordersBody').innerHTML = rows.map(function (o) {
+        var when = new Date(o.created_at);
+        var names = (o.items || []).map(function (it) {
+          return escapeHtml(it.name) + (it.qty > 1 ? ' ×' + it.qty : '');
+        });
+        var head = names[0] || '상품';
+        if (names.length > 1) head += ' 외 ' + (names.length - 1) + '건';
+
+        return '' +
+          '<div class="order">' +
+            '<div class="order__top">' +
+              '<b class="order__no">' + escapeHtml(o.order_no) + '</b>' +
+              '<span class="order__date">' +
+                when.getFullYear() + '.' + (when.getMonth() + 1) + '.' + when.getDate() +
+              '</span>' +
+            '</div>' +
+            '<p class="order__items">' + head + '</p>' +
+            '<p class="order__total">' + won(o.total) + '원</p>' +
+          '</div>';
+      }).join('');
+    });
   }
 
   function initCheckout() {
@@ -791,21 +863,34 @@
     }).join('');
   }
 
+  function paint() {
+    initStats();
+    initCategories();
+    render();
+    renderWish();
+    renderCart();
+    updateBadges();
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     toastBox = $('#toasts');
 
     state.wish = load(KEY_WISH, []);
     state.cart = load(KEY_CART, []);
 
-    initStats();
-    initCategories();
     initEvents();
     initAuth();
     initCheckout();
 
-    render();
-    renderWish();
-    renderCart();
-    updateBadges();
+    // 먼저 번들된 상품으로 즉시 그려서 빈 화면을 보이지 않게 하고,
+    // Supabase 에서 최신 상품 목록이 오면 다시 그립니다.
+    // (DB 가 비어 있거나 연결이 안 되면 번들 데이터를 그대로 씁니다)
+    paint();
+
+    DB.products.list().then(function (rows) {
+      if (!rows) return;
+      PRODUCTS = rows;
+      paint();
+    });
   });
 })();

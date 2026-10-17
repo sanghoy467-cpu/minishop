@@ -228,6 +228,38 @@ input{ font-family:inherit; }
 .choice__text b{ font-size:14.5px; font-weight:700; }
 .choice__text small{ font-size:12px; color:var(--ink-faint); }
 
+/* ---------- 주문 내역 ---------- */
+
+.orders{ max-height:min(52vh,420px); overflow-y:auto; }
+
+.orders__loading{
+  margin:0; padding:34px 0; text-align:center;
+  font-size:13.5px; color:var(--ink-faint);
+}
+
+.order{
+  padding:14px 0;
+  border-bottom:1px solid var(--line);
+}
+.order:last-child{ border-bottom:none; }
+
+.order__top{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:10px; margin-bottom:6px;
+}
+.order__no{
+  font-size:13.5px; font-weight:800;
+  letter-spacing:.03em; color:var(--copper-dark);
+}
+.order__date{ font-size:12px; color:var(--ink-faint); }
+
+.order__items{
+  margin:0 0 5px; font-size:13.5px; line-height:1.5; color:var(--ink);
+}
+.order__total{
+  margin:0; font-size:14.5px; font-weight:800;
+}
+
 /* ---------- 주문 완료 ---------- */
 
 .done__icon{ font-size:46px; margin-bottom:12px; }
