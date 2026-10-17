@@ -499,6 +499,7 @@ input{ font-family:inherit; }
   margin:0; font-family:var(--serif);
   font-size:25px; font-weight:700; letter-spacing:.02em;
 }
+.section-head__title[hidden]{ display:none !important; }
 .section-head__sub{
   margin:5px 0 0; font-size:13.5px; color:var(--ink-soft);
 }

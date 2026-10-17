@@ -472,10 +472,19 @@
 
     $('#resultCount').innerHTML = '총 <b>' + list.length + '</b>개 상품';
 
+    // 기본 목록에는 제목을 두지 않고, 찜 보기나 카테고리를 고른 경우에만
+    // 지금 무엇을 보고 있는지 알려 줍니다.
     var title = $('#listTitle');
-    if (state.onlyWish) title.textContent = '내가 찜한 상품';
-    else if (state.category !== '전체') title.textContent = state.category;
-    else title.textContent = '오늘의 주방 특가';
+    if (state.onlyWish) {
+      title.textContent = '내가 찜한 상품';
+      title.hidden = false;
+    } else if (state.category !== '전체') {
+      title.textContent = state.category;
+      title.hidden = false;
+    } else {
+      title.textContent = '';
+      title.hidden = true;
+    }
   }
 
   /* =======================================================
@@ -610,7 +619,7 @@
         '<div class="empty">' +
           '<div class="empty__icon">🛒</div>' +
           '<p class="empty__title">장바구니가 비어 있습니다</p>' +
-          '<p class="empty__desc">오늘의 특가 상품을 담아보세요.</p>' +
+          '<p class="empty__desc">마음에 드는 화폐를 담아보세요.</p>' +
         '</div>';
     } else {
       body.innerHTML = rows.map(function (r) {
