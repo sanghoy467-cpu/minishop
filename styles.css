@@ -34,9 +34,10 @@
           "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
   --serif: "Nanum Myeongjo", "Batang", Georgia, serif;
 
-  /* 배경 이미지 — 여러 종류의 옛날 지폐 (독일 제국은행권 구권)
-     Rawpixel (CC0 / Public Domain) — 저작자 표시 의무 없음 */
-  --hero-bg: url("https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZyYmFua19ub3RlX2ltcGVyaWFsX2Jhbmtub3RlLWltYWdlLWt5YmM3ZXJhLmpwZw.jpg");
+  /* 배경 이미지 — 대한민국 지폐 전종과 주화
+     Wikimedia Commons "Currency South Korea" — 한국은행 화폐도안 이용기준에 따라 사용.
+     도안을 분리·변형하지 않고 원형 그대로 배경에만 씁니다. */
+  --hero-bg: url("https://upload.wikimedia.org/wikipedia/commons/5/52/Currency_South_Korea.jpg");
 }
 
 *,*::before,*::after{ box-sizing:border-box; }
@@ -264,7 +265,7 @@ input{ font-family:inherit; }
 .sheet__item:last-child{ border-bottom:none; }
 .sheet__item img{
   width:48px; height:48px; flex-shrink:0;
-  object-fit:cover; border-radius:8px; background:var(--bg-deep);
+  object-fit:contain; border-radius:8px; background:var(--surface-2);
 }
 .sheet__item-info{ flex:1; min-width:0; }
 .sheet__item-name{
@@ -445,14 +446,14 @@ input{ font-family:inherit; }
   position:relative; overflow:hidden;
   display:grid; align-items:center;
   color:#fff;
-  background-color:#2e2314;
+  background-color:#241d14;
   background-image:var(--hero-bg);
   background-size:cover;
   background-position:center 50%;
 }
 .hero::after{
   content:""; position:absolute; inset:0;
-  background:linear-gradient(100deg, rgba(32,24,14,.92) 0%, rgba(32,24,14,.74) 48%, rgba(32,24,14,.34) 100%);
+  background:linear-gradient(100deg, rgba(26,22,16,.93) 0%, rgba(26,22,16,.80) 48%, rgba(26,22,16,.52) 100%);
 }
 .hero__inner{
   position:relative; z-index:1;
@@ -557,15 +558,18 @@ input{ font-family:inherit; }
   to  { opacity:1; transform:none; }
 }
 
+/* 지폐는 가로로 길고(약 2.2:1) 주화는 정사각형이라, 잘라내지 않고
+   전체가 보이도록 contain 으로 맞춥니다. */
 .card__media{
-  position:relative; aspect-ratio:1/1;
-  background:var(--bg-deep); overflow:hidden;
+  position:relative; aspect-ratio:4/3;
+  background:var(--surface-2); overflow:hidden;
+  padding:12px;
 }
 .card__img{
-  width:100%; height:100%; object-fit:cover;
+  width:100%; height:100%; object-fit:contain;
   transition:transform .55s cubic-bezier(.2,.8,.3,1);
 }
-.card:hover .card__img{ transform:scale(1.07); }
+.card:hover .card__img{ transform:scale(1.05); }
 
 .card__sale{
   position:absolute; top:11px; left:11px;
@@ -696,8 +700,8 @@ input{ font-family:inherit; }
 .line:last-child{ border-bottom:none; }
 .line__img{
   width:74px; height:74px; flex-shrink:0;
-  object-fit:cover; border-radius:var(--radius-sm);
-  background:var(--bg-deep);
+  object-fit:contain; border-radius:var(--radius-sm);
+  background:var(--surface-2);
 }
 .line__info{ flex:1; min-width:0; }
 .line__name{

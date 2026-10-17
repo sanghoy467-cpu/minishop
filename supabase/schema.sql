@@ -87,30 +87,32 @@ create policy "회원은 자기 주문만 조회할 수 있다"
 -- ---------------------------------------------------------
 -- ---------------------------------------------------------
 -- ---------------------------------------------------------
--- 3. 상품 데이터 (화폐 18종 — 동전과 지폐 구권 · 신권)
+-- ---------------------------------------------------------
+-- 3. 상품 데이터 (국내 화폐 19종 — 지폐 구권·신권·환, 주화)
 --    이미 있으면 최신 값으로 갱신합니다.
 -- ---------------------------------------------------------
 insert into public.products
   (id, name, category, brand, price, discount, rating, reviews, flag, emoji, image)
 values
-  (1, '1861년 미국 5달러 대형 구권', '지폐·구권', '고전화폐사', 1850000, 18, 4.9, 142, 'BEST', '💵', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL2xyL3drMjUxODMwMzMtaW1hZ2UuanBn.jpg'),
-  (2, '1862년 미국 50달러 대형 구권', '지폐·구권', '고전화폐사', 3200000, 15, 4.8, 87, 'BEST', '💵', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL2xyL3drMzM0MjIxMjgtaW1hZ2UuanBn.jpg'),
-  (3, '1926년 프랑스 1000프랑 구권', '지폐·구권', '고전화폐사', 680000, 25, 4.7, 213, '', '💶', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTEwL3BkbWlzYzYtd2szMDU5OTkzNS0wMS1pbWFnZV8xLmpwZw.jpg'),
-  (4, '남부연합 5·100달러 구권 2매 세트', '지폐·구권', '고전화폐사', 1240000, 22, 4.6, 96, '', '📜', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZnJiaWxsc19jb25mZWRlcmF0ZV9zdGF0ZXNfYW1lcmljYS1pbWFnZS1reWJlOHpvZC5qcGc.jpg'),
-  (5, '1909년 독일 제국은행권 100마르크', '지폐·구권', '고전화폐사', 145000, 30, 4.7, 458, '', '📜', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZyYmFua19ub3RlX2ltcGVyaWFsX2Jhbmtub3RlXzItaW1hZ2Uta3liYzdkOGEuanBn.jpg'),
-  (6, '독일 제국은행권 구권 모음 5매', '지폐·구권', '고전화폐사', 390000, 28, 4.8, 301, 'BEST', '📜', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZnJtb25leV9kb2xsYXJfYmlsbF9iaWxscy1pbWFnZS1reWJkN25uaS5qcGc.jpg'),
-  (7, '1928년 미국 5달러 소형 신권', '지폐·신권', '프리미엄노트', 920000, 20, 4.8, 176, '', '💵', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL2xyL3drMjQ4ODcyMzctaW1hZ2UuanBn.jpg'),
-  (8, '미국 1달러 신권 미사용 연번호', '지폐·신권', '프리미엄노트', 38000, 26, 4.5, 1204, 'NEW', '💵', 'https://cdn.stocksnap.io/img-thumbs/960w/HHH84SKFXQ.jpg'),
-  (9, '미국 달러 신권 묶음 20매', '지폐·신권', '프리미엄노트', 185000, 24, 4.6, 642, '', '💵', 'https://cdn.stocksnap.io/img-thumbs/960w/RG4XMMLSNU.jpg'),
-  (10, '유로 10유로 신권 10매 연번호', '지폐·신권', '프리미엄노트', 235000, 21, 4.7, 388, 'NEW', '💶', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZybW9uZXlfZXVyb3NfYmFua25vdGVzX2JpbGxzXzAtaW1hZ2Uta3liZDcwZGQuanBn.jpg'),
-  (11, '유로 고액권 200·500 세트', '지폐·신권', '프리미엄노트', 1480000, 12, 4.9, 154, '', '💶', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZybW9uZXlfc2VlbV9ldXJvX2JpbGxzXzQtaW1hZ2Uta3liYjJwZ3UuanBn.jpg'),
-  (12, '1807년 미국 5달러 금화', '금화', '삼환화폐', 4800000, 10, 5.0, 63, 'BEST', '🪙', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL2xyL3drNDI4MTYxMDMtaW1hZ2UuanBn.jpg'),
-  (13, '프랑스 20프랑 세레스 금화', '금화', '삼환화폐', 1120000, 16, 4.8, 227, '', '🪙', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvZmlsZXMvd2Vic2l0ZS8yMDIyLTExL3drNzk2ODk0OTYtaW1hZ2UuanBn.jpg'),
-  (14, '로마 트라야누스 금화 아우레우스', '고대주화', '삼환화폐', 6500000, 8, 5.0, 41, 'BEST', '🏛️', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL2xyL3drODAzOTgwMTYtaW1hZ2UuanBn.jpg'),
-  (15, '로마 하드리아누스 청동화', '고대주화', '삼환화폐', 740000, 19, 4.7, 118, '', '🏛️', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL2xyL3drODAxNDQ3NDMtaW1hZ2UuanBn.jpg'),
-  (16, '빅토리아 여왕 즉위 60주년 기념 금메달', '기념주화', '월드코인', 2850000, 14, 4.9, 72, '', '🏅', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTA5L21ldDE5MDU0OC1pbWFnZS5qcGc.jpg'),
-  (17, '나폴레옹 3세 만국박람회 기념 은메달', '기념주화', '월드코인', 560000, 23, 4.6, 165, '', '🏅', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZmwzOTQ3NzMxNjU1MS1pbWFnZS1reWNqNHpweS5qcGc.jpg'),
-  (18, '세계 각국 주화 30종 컬렉션', '세계주화', '월드코인', 128000, 35, 4.5, 892, 'NEW', '🌏', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL3B4MTI0NzI3OS1pbWFnZS1rd3lxdHkzZy5qcGc.jpg')
+  (1, '10000원 1차 발행권 가군 미사용', '지폐·구권', '한국화폐', 180000, 15, 4.9, 87, 'BEST', '💴', 'https://upload.wikimedia.org/wikipedia/commons/1/13/10000_won_serieI_obverse.jpeg'),
+  (2, '10000원 3차 발행권 미사용', '지폐·구권', '한국화폐', 95000, 20, 4.7, 134, '', '💴', 'https://upload.wikimedia.org/wikipedia/commons/4/44/10000_won_serieIII_obverse.jpeg'),
+  (3, '5000원 1차 발행권 율곡 미사용', '지폐·구권', '한국화폐', 240000, 12, 4.9, 62, 'BEST', '💴', 'https://upload.wikimedia.org/wikipedia/commons/b/b4/5000_won_serieI_obverse.jpeg'),
+  (4, '1000원 1차 발행권 퇴계 미사용', '지폐·구권', '한국화폐', 165000, 18, 4.8, 103, '', '💴', 'https://upload.wikimedia.org/wikipedia/commons/5/58/1000_won_serieI_obverse.jpeg'),
+  (5, '100원 2차 발행권 독립문', '지폐·구권', '고전지폐', 78000, 22, 4.6, 215, '', '💴', 'https://upload.wikimedia.org/wikipedia/commons/d/df/100_won_serieII_obverse.jpeg'),
+  (6, '50원 1차 발행권', '지폐·구권', '고전지폐', 52000, 25, 4.5, 178, '', '💴', 'https://upload.wikimedia.org/wikipedia/commons/2/23/50_won_serieI_obverse.jpeg'),
+  (7, '10000원 신권 미사용 연번호', '지폐·신권', '한국화폐', 24000, 10, 4.8, 642, 'NEW', '💵', 'https://upload.wikimedia.org/wikipedia/commons/1/1c/10000_won_serieVI_obverse.jpeg'),
+  (8, '5000원 신권 미사용 연번호', '지폐·신권', '한국화폐', 13500, 12, 4.7, 588, 'NEW', '💵', 'https://upload.wikimedia.org/wikipedia/commons/b/bb/5000_won_serieV_obverse.jpeg'),
+  (9, '1000원 신권 미사용 연번호', '지폐·신권', '한국화폐', 4500, 8, 4.6, 921, '', '💵', 'https://upload.wikimedia.org/wikipedia/commons/8/8c/1000_won_serieIII_obverse.jpeg'),
+  (10, '1000환 1960년 세종대왕 견양', '지폐·환', '고전지폐', 420000, 14, 4.9, 48, 'BEST', '📜', 'https://upload.wikimedia.org/wikipedia/commons/1/19/1000_hwan_600815_obverse.jpg'),
+  (11, '500환 1961년 세종대왕 견양', '지폐·환', '고전지폐', 310000, 16, 4.8, 57, '', '📜', 'https://upload.wikimedia.org/wikipedia/commons/7/75/500_hwan_610419_obverse.jpg'),
+  (12, '100환 1962년 모자상', '지폐·환', '고전지폐', 135000, 20, 4.7, 112, '', '📜', 'https://upload.wikimedia.org/wikipedia/commons/b/bf/100_hwan_620516_obverse.jpg'),
+  (13, '10환 1953년 남대문', '지폐·환', '고전지폐', 88000, 24, 4.6, 96, '', '📜', 'https://upload.wikimedia.org/wikipedia/commons/f/f6/10_hwan_531215_obverse.jpg'),
+  (14, '100원 주화 1970년 초년도', '주화·원', '삼환화폐', 65000, 18, 4.8, 143, '', '🪙', 'https://upload.wikimedia.org/wikipedia/commons/4/4e/100_won_1970_obverse.jpeg'),
+  (15, '100원 주화 1983년', '주화·원', '삼환화폐', 12000, 28, 4.5, 327, '', '🪙', 'https://upload.wikimedia.org/wikipedia/commons/9/91/100_won_1983_obverse.jpeg'),
+  (16, '500원 주화 1982년 초년도', '주화·원', '삼환화폐', 45000, 22, 4.7, 189, '', '🪙', 'https://upload.wikimedia.org/wikipedia/commons/0/01/500_won_1982_obverse.jpeg'),
+  (17, '100환 주화 1959년', '주화·환', '삼환화폐', 72000, 19, 4.7, 74, '', '🪙', 'https://upload.wikimedia.org/wikipedia/commons/2/2a/100_hwan_coin_obverse.jpeg'),
+  (18, '50환 주화 1959년', '주화·환', '삼환화폐', 38000, 26, 4.6, 118, '', '🪙', 'https://upload.wikimedia.org/wikipedia/commons/e/e9/50_hwan_coin_obverse.jpeg'),
+  (19, '한국 주화 모음 6종 세트', '세트', '삼환화폐', 58000, 30, 4.6, 402, 'NEW', '🧧', 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Southkoreancoins.jpg')
 on conflict (id) do update set
   name     = excluded.name,
   category = excluded.category,
