@@ -179,7 +179,7 @@ var DB = (function () {
         if (!client) return Promise.resolve([]);
         return client
           .from('orders')
-          .select('order_no,buyer_name,items,total,created_at')
+          .select('order_no,buyer_name,buyer_address,buyer_detail,items,total,created_at')
           .order('created_at', { ascending: false })
           .limit(30)
           .then(function (res) {

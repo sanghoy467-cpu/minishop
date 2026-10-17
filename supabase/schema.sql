@@ -43,16 +43,24 @@ create policy "상품은 누구나 조회할 수 있다"
 --    (나중에 상품 가격이 바뀌어도 주문 내역은 보존됩니다)
 -- ---------------------------------------------------------
 create table if not exists public.orders (
-  id          uuid primary key default gen_random_uuid(),
-  order_no    text not null unique,
-  user_id     uuid references auth.users(id) on delete set null,
-  buyer_type  text not null check (buyer_type in ('member', 'guest')),
-  buyer_name  text not null,
-  buyer_phone text,
-  items       jsonb   not null,
-  total       integer not null check (total >= 0),
-  created_at  timestamptz not null default now()
+  id            uuid primary key default gen_random_uuid(),
+  order_no      text not null unique,
+  user_id       uuid references auth.users(id) on delete set null,
+  buyer_type    text not null check (buyer_type in ('member', 'guest')),
+  buyer_name    text not null,
+  buyer_phone   text,
+  buyer_address text,          -- 주문서의 배송 주소
+  buyer_detail  text,          -- 상세 주소 (동 · 호수)
+  buyer_memo    text,          -- 배송 요청사항
+  items         jsonb   not null,
+  total         integer not null check (total >= 0),
+  created_at    timestamptz not null default now()
 );
+
+-- 배송 정보 컬럼이 없던 시점에 만든 테이블에도 채워 넣습니다.
+alter table public.orders add column if not exists buyer_address text;
+alter table public.orders add column if not exists buyer_detail  text;
+alter table public.orders add column if not exists buyer_memo    text;
 
 create index if not exists orders_user_id_idx on public.orders (user_id);
 

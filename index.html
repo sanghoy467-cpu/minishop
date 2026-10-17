@@ -257,51 +257,80 @@
   </div>
 </div>
 
-<!-- ======================= 모달 : 주문 방식 선택 ======================= -->
+<!-- ======================= 모달 : 주문서 ======================= -->
 <div class="modal" id="orderModal" hidden>
   <div class="modal__backdrop" data-modal-close></div>
-  <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="orderTitle">
+  <div class="modal__card modal__card--wide" role="dialog" aria-modal="true" aria-labelledby="orderTitle">
     <button class="modal__close" type="button" data-modal-close aria-label="닫기">✕</button>
 
-    <!-- 1단계 : 주문 방식 선택 -->
-    <div id="orderChoice">
-      <h2 class="modal__title" id="orderTitle">어떻게 주문하시겠어요?</h2>
-      <p class="modal__desc">
-        결제 예정 금액 <b id="orderAmount">0원</b><br>
-        회원으로 주문하시면 주문 내역이 계정에 저장됩니다.
-      </p>
-      <div class="choice">
-        <button class="choice__btn choice__btn--primary" type="button" data-auth-open="login">
-          <span class="choice__icon">👤</span>
-          <span class="choice__text"><b>로그인하고 주문</b><small>이미 회원이신 경우</small></span>
-        </button>
-        <button class="choice__btn" type="button" data-auth-open="signup">
-          <span class="choice__icon">✨</span>
-          <span class="choice__text"><b>회원가입하고 주문</b><small>주문 내역이 저장돼요</small></span>
-        </button>
-        <button class="choice__btn" type="button" id="guestOrderBtn">
-          <span class="choice__icon">🛍️</span>
-          <span class="choice__text"><b>비회원으로 주문</b><small>가입 없이 바로 주문</small></span>
-        </button>
-      </div>
+    <h2 class="modal__title" id="orderTitle">주문서</h2>
+    <p class="modal__desc">주문 내용을 확인하고 배송 정보를 입력해 주세요.</p>
+
+    <!-- 비로그인 안내 (로그인 상태면 숨김) -->
+    <div class="sheet__notice" id="orderGuestNotice">
+      <span>로그인하시면 주문 내역이 계정에 저장됩니다.</span>
+      <button class="linkbtn" type="button" data-auth-open="login">로그인</button>
     </div>
 
-    <!-- 2단계 : 비회원 주문 정보 -->
-    <form id="guestForm" novalidate hidden>
-      <h2 class="modal__title">비회원 주문</h2>
-      <p class="modal__desc">배송에 필요한 정보만 입력해 주세요.</p>
-      <div class="field">
-        <label class="field__label" for="guestName">받는 분</label>
-        <input class="field__input" type="text" id="guestName" placeholder="이름을 입력하세요">
-      </div>
-      <div class="field">
-        <label class="field__label" for="guestPhone">연락처</label>
-        <input class="field__input" type="tel" id="guestPhone" placeholder="010-0000-0000" inputmode="tel">
-      </div>
-      <p class="gate__error" id="guestError" role="alert"></p>
-      <button class="btn-primary" type="submit">비회원으로 주문하기</button>
-      <p class="gate__hint">
-        비회원 주문은 <b>주문번호</b>로 조회합니다. 주문 완료 후 번호를 꼭 저장해 주세요.
+    <form id="orderForm" novalidate>
+
+      <!-- 주문 상품 -->
+      <section class="sheet__section">
+        <h3 class="sheet__head">주문 상품 <span id="orderItemCount">0</span></h3>
+        <div class="sheet__items" id="orderItems"></div>
+      </section>
+
+      <!-- 배송 정보 -->
+      <section class="sheet__section">
+        <h3 class="sheet__head">배송 정보</h3>
+        <div class="sheet__grid">
+          <div class="field">
+            <label class="field__label" for="orderName">받는 분 <i>*</i></label>
+            <input class="field__input" type="text" id="orderName"
+                   placeholder="이름" autocomplete="name">
+          </div>
+          <div class="field">
+            <label class="field__label" for="orderPhone">연락처 <i>*</i></label>
+            <input class="field__input" type="tel" id="orderPhone"
+                   placeholder="010-0000-0000" inputmode="tel" autocomplete="tel">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field__label" for="orderAddress">주소 <i>*</i></label>
+          <input class="field__input" type="text" id="orderAddress"
+                 placeholder="도로명 또는 지번 주소" autocomplete="street-address">
+        </div>
+        <div class="field">
+          <label class="field__label" for="orderDetail">상세 주소</label>
+          <input class="field__input" type="text" id="orderDetail"
+                 placeholder="동 · 호수 등" autocomplete="address-line2">
+        </div>
+        <div class="field">
+          <label class="field__label" for="orderMemo">배송 요청사항</label>
+          <select class="field__input" id="orderMemo">
+            <option value="">선택해 주세요</option>
+            <option>부재 시 경비실에 맡겨주세요</option>
+            <option>부재 시 문 앞에 놓아주세요</option>
+            <option>배송 전 연락 주세요</option>
+            <option>파손 주의해 주세요</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- 결제 금액 -->
+      <section class="sheet__section sheet__section--last">
+        <h3 class="sheet__head">결제 금액</h3>
+        <div class="sumline"><span>상품 금액</span><span id="sheetList">0원</span></div>
+        <div class="sumline sumline--save"><span>할인 금액</span><span id="sheetSave">-0원</span></div>
+        <div class="sumline"><span>배송비</span><span id="sheetShip">무료</span></div>
+        <div class="sumline sumline--total"><span>총 결제 금액</span><span id="sheetTotal"><b>0</b>원</span></div>
+      </section>
+
+      <p class="gate__error" id="orderError" role="alert"></p>
+      <button class="btn-primary" type="submit" id="orderSubmit">결제하고 주문하기</button>
+      <p class="gate__hint" id="orderHint">
+        데모 상점이라 <b>실제 결제는 이루어지지 않습니다.</b><br>
+        비회원 주문은 발급된 <b>주문번호</b>로만 조회할 수 있으니 꼭 저장해 주세요.
       </p>
     </form>
   </div>

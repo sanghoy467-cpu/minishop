@@ -136,10 +136,13 @@
     closeModals();
     toast(welcomeMessage || (user.id + '님, 환영합니다'), '🥤');
 
-    // 주문하려다 로그인한 경우라면 그대로 주문을 이어서 진행합니다.
+    // 주문서에서 로그인하러 온 경우라면 주문서를 다시 열어 줍니다.
     if (pendingCheckout) {
       pendingCheckout = false;
-      setTimeout(function () { placeOrder(); }, 420);
+      setTimeout(function () {
+        renderOrderSheet();
+        openModal('orderModal');
+      }, 420);
     }
   }
 
@@ -287,9 +290,11 @@
     // --- 주문 내역 ---
     $('#ordersBtn').addEventListener('click', showMyOrders);
 
-    // --- 모달 열기 버튼 (헤더 / 상단바 / 주문 선택지) ---
+    // --- 모달 열기 버튼 (헤더 / 상단바 / 주문서 안내) ---
     $$('[data-auth-open]').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        // 주문서에서 로그인하러 간 경우, 로그인 후 주문서로 돌아옵니다.
+        pendingCheckout = !$('#orderModal').hidden;
         openAuth(btn.dataset.authOpen);
       });
     });
@@ -663,26 +668,59 @@
      로그인 상태면 바로 주문, 아니면 주문 방식을 먼저 고릅니다.
      ======================================================= */
 
-  var pendingCheckout = false;   // 로그인 후 이어서 주문할지 여부
+  var pendingCheckout = false;   // 로그인 후 주문서를 다시 열지 여부
 
+  /** 장바구니의 "주문하기" → 주문서 화면을 엽니다. */
   function startCheckout() {
     if (!state.cart.length) {
       toast('장바구니가 비어 있습니다', '🛒');
       return;
     }
-
-    if (state.user) {          // 회원 — 바로 주문
-      placeOrder();
-      return;
-    }
-
-    // 비회원 — 주문 방식 선택
-    pendingCheckout = true;
-    $('#orderChoice').hidden = false;
-    $('#guestForm').hidden = true;
-    $('#orderAmount').textContent = won(cartTotals().total) + '원';
+    renderOrderSheet();
     closeDrawers();
     openModal('orderModal');
+    setTimeout(function () {
+      var name = $('#orderName');
+      (name.value ? $('#orderPhone') : name).focus();
+    }, 160);
+  }
+
+  /** 주문서의 상품 목록과 결제 금액을 채웁니다. */
+  function renderOrderSheet() {
+    var rows = state.cart.map(function (row) {
+      var p = findProduct(row.id);
+      return p ? { p: p, qty: row.qty } : null;
+    }).filter(Boolean);
+
+    $('#orderItemCount').textContent = rows.length;
+    $('#orderItems').innerHTML = rows.map(function (r) {
+      var p = r.p;
+      return '' +
+        '<div class="sheet__item">' +
+          '<img src="' + p.image + '" alt="" loading="lazy" ' +
+               'onerror="this.onerror=null;this.src=\'' + fallbackImage(p.emoji) + '\'">' +
+          '<div class="sheet__item-info">' +
+            '<p class="sheet__item-name">' + escapeHtml(p.name) + '</p>' +
+            '<span class="sheet__item-qty">' + p.discount + '% 할인 · 수량 ' + r.qty + '개</span>' +
+          '</div>' +
+          '<span class="sheet__item-price">' + won(salePrice(p) * r.qty) + '원</span>' +
+        '</div>';
+    }).join('');
+
+    var t = cartTotals();
+    $('#sheetList').textContent = won(t.listPrice) + '원';
+    $('#sheetSave').textContent = '-' + won(t.saved) + '원';
+    $('#sheetShip').textContent = t.ship === 0 ? '무료' : won(t.ship) + '원';
+    $('#sheetTotal').innerHTML = '<b>' + won(t.total) + '</b>원';
+
+    // 로그인 상태면 안내 줄을 숨기고 받는 분을 채워 둡니다.
+    var signedIn = !!state.user;
+    $('#orderGuestNotice').hidden = signedIn;
+    if (signedIn && !$('#orderName').value) $('#orderName').value = state.user.id;
+
+    $('#orderSubmit').textContent = '결제하고 주문하기';
+    $('#orderSubmit').disabled = false;
+    $('#orderError').textContent = '';
   }
 
   function orderNumber() {
@@ -694,13 +732,12 @@
   }
 
   /**
-   * 주문을 확정하고 Supabase 에 저장합니다.
-   * @param {{name:string, phone:string}=} guest 비회원 주문자 정보 (회원 주문이면 생략)
+   * 주문서에 적힌 내용으로 주문을 확정하고 Supabase 에 저장합니다.
+   * @param {{name:string, phone:string, address:string, detail:string, memo:string}} info 배송 정보
    */
-  function placeOrder(guest) {
+  function placeOrder(info) {
     var t = cartTotals();
     if (!t.count) { toast('장바구니가 비어 있습니다', '🛒'); return; }
-    if (!guest && !state.user) { startCheckout(); return; }
 
     // 주문 시점의 상품 정보를 함께 담아 둡니다.
     // (나중에 가격이 바뀌어도 주문 내역은 그대로 보존됩니다)
@@ -713,14 +750,24 @@
       };
     }).filter(Boolean);
 
+    var member = !!state.user;
     var no = orderNumber();
-    var payload = guest
-      ? { order_no: no, user_id: null, buyer_type: 'guest',
-          buyer_name: guest.name, buyer_phone: guest.phone, items: items, total: t.total }
-      : { order_no: no, user_id: state.user.uid, buyer_type: 'member',
-          buyer_name: state.user.id, buyer_phone: null, items: items, total: t.total };
+    var payload = {
+      order_no: no,
+      user_id: member ? state.user.uid : null,
+      buyer_type: member ? 'member' : 'guest',
+      buyer_name: info.name,
+      buyer_phone: info.phone,
+      buyer_address: info.address,
+      buyer_detail: info.detail || null,
+      buyer_memo: info.memo || null,
+      items: items,
+      total: t.total
+    };
 
-    toast('주문을 접수하고 있습니다…', '⏳');
+    var btn = $('#orderSubmit');
+    btn.disabled = true;
+    btn.textContent = '주문 접수 중…';
 
     DB.orders.create(payload).then(function () {
       // 주문이 실제로 저장된 뒤에만 장바구니를 비웁니다.
@@ -733,14 +780,16 @@
       closeDrawers();
 
       $('#doneDesc').innerHTML =
-        (guest ? escapeHtml(guest.name) + '님 (비회원 주문)' : escapeHtml(state.user.id) + '님') +
-        '<br>결제 예정 금액 <b>' + won(t.total) + '원</b>';
+        escapeHtml(info.name) + '님' + (member ? '' : ' (비회원 주문)') + '<br>' +
+        escapeHtml(info.address) + (info.detail ? ' ' + escapeHtml(info.detail) : '') + '<br>' +
+        '결제 예정 금액 <b>' + won(t.total) + '원</b>';
       $('#doneOrderNo').textContent = no;
       openModal('doneModal');
     }).catch(function (error) {
-      pendingCheckout = false;
-      closeModals();
-      toast(DB.describeError(error, '주문 저장에 실패했습니다. 다시 시도해 주세요.'), '⚠️');
+      btn.disabled = false;
+      btn.textContent = '결제하고 주문하기';
+      $('#orderError').textContent =
+        DB.describeError(error, '주문 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
     });
   }
 
@@ -783,6 +832,10 @@
               '</span>' +
             '</div>' +
             '<p class="order__items">' + head + '</p>' +
+            (o.buyer_address
+              ? '<p class="order__addr">' + escapeHtml(o.buyer_address) +
+                (o.buyer_detail ? ' ' + escapeHtml(o.buyer_detail) : '') + '</p>'
+              : '') +
             '<p class="order__total">' + won(o.total) + '원</p>' +
           '</div>';
       }).join('');
@@ -792,30 +845,50 @@
   function initCheckout() {
     $('#checkoutBtn').addEventListener('click', startCheckout);
 
-    // 비회원 주문 — 정보 입력 단계로
-    $('#guestOrderBtn').addEventListener('click', function () {
-      $('#orderChoice').hidden = true;
-      $('#guestForm').hidden = false;
-      setTimeout(function () { $('#guestName').focus(); }, 120);
-    });
-
-    // 비회원 주문 확정
-    $('#guestForm').addEventListener('submit', function (e) {
+    // 주문서 제출
+    $('#orderForm').addEventListener('submit', function (e) {
       e.preventDefault();
-      var name  = $('#guestName').value.trim();
-      var phone = $('#guestPhone').value.trim();
-      var err   = $('#guestError');
 
-      if (!name) { err.textContent = '받는 분 이름을 입력해 주세요.'; $('#guestName').focus(); return; }
-      if (!phone) { err.textContent = '연락처를 입력해 주세요.'; $('#guestPhone').focus(); return; }
+      var name    = $('#orderName').value.trim();
+      var phone   = $('#orderPhone').value.trim();
+      var address = $('#orderAddress').value.trim();
+      var detail  = $('#orderDetail').value.trim();
+      var memo    = $('#orderMemo').value;
+      var err     = $('#orderError');
+
+      if (!state.cart.length) {
+        err.textContent = '장바구니가 비어 있습니다.';
+        return;
+      }
+      if (!name) {
+        err.textContent = '받는 분 이름을 입력해 주세요.';
+        $('#orderName').focus(); return;
+      }
+      if (!phone) {
+        err.textContent = '연락처를 입력해 주세요.';
+        $('#orderPhone').focus(); return;
+      }
       if (phone.replace(/[^0-9]/g, '').length < 9) {
-        err.textContent = '연락처를 정확히 입력해 주세요.';
-        $('#guestPhone').select(); return;
+        err.textContent = '연락처를 정확히 입력해 주세요. 예) 010-1234-5678';
+        $('#orderPhone').select(); return;
+      }
+      if (!address) {
+        err.textContent = '주소를 입력해 주세요.';
+        $('#orderAddress').focus(); return;
+      }
+      if (address.length < 5) {
+        err.textContent = '주소를 조금 더 자세히 입력해 주세요.';
+        $('#orderAddress').select(); return;
+      }
+      if (!DB.online) {
+        err.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.'; return;
       }
 
       err.textContent = '';
-      closeModals();
-      placeOrder({ name: name, phone: phone });
+      placeOrder({
+        name: name, phone: phone,
+        address: address, detail: detail, memo: memo
+      });
     });
   }
 
