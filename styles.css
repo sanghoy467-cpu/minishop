@@ -1,6 +1,6 @@
 /* =========================================================
    삼환 물류(주) (Samhwan Logistics) — Mini Shop
-   화폐판매 — 동전과 지폐(구권 · 신권)
+   화폐수집 — 동전과 지폐
    ========================================================= */
 
 :root{
@@ -34,10 +34,9 @@
           "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
   --serif: "Nanum Myeongjo", "Batang", Georgia, serif;
 
-  /* 배경 이미지 — 대한민국 지폐 전종과 주화
-     Wikimedia Commons "Currency South Korea" — 한국은행 화폐도안 이용기준에 따라 사용.
-     도안을 분리·변형하지 않고 원형 그대로 배경에만 씁니다. */
-  --hero-bg: url("https://upload.wikimedia.org/wikipedia/commons/5/52/Currency_South_Korea.jpg");
+  /* 배경 이미지 — 동전이 담긴 화폐수집 책자(앨범)
+     Wikimedia Commons "Antique coins ... world coin stock book" (CC0) */
+  --hero-bg: url("https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Antique_coins_from_a_personal_collection%2C_arranged_within_a_world_coin_stock_book%2C_photographed_in_West_Bengal%2C_India%2C_February_18%2C_2024.jpg/1280px-Antique_coins_from_a_personal_collection%2C_arranged_within_a_world_coin_stock_book%2C_photographed_in_West_Bengal%2C_India%2C_February_18%2C_2024.jpg");
 }
 
 *,*::before,*::after{ box-sizing:border-box; }
@@ -76,8 +75,8 @@ input{ font-family:inherit; }
 
 .modal__backdrop{
   position:absolute; inset:0;
-  background-color:rgba(36,27,16,.82);
-  background-image:linear-gradient(rgba(36,27,16,.70), rgba(36,27,16,.86)), var(--hero-bg);
+  background-color:rgba(28,21,14,.84);
+  background-image:linear-gradient(rgba(28,21,14,.72), rgba(28,21,14,.88)), var(--hero-bg);
   background-size:cover;
   background-position:center;
   animation:fadeIn .25s ease both;
@@ -446,14 +445,14 @@ input{ font-family:inherit; }
   position:relative; overflow:hidden;
   display:grid; align-items:center;
   color:#fff;
-  background-color:#241d14;
+  background-color:#1d170f;
   background-image:var(--hero-bg);
   background-size:cover;
   background-position:center 50%;
 }
 .hero::after{
   content:""; position:absolute; inset:0;
-  background:linear-gradient(100deg, rgba(26,22,16,.93) 0%, rgba(26,22,16,.80) 48%, rgba(26,22,16,.52) 100%);
+  background:linear-gradient(100deg, rgba(24,18,12,.90) 0%, rgba(24,18,12,.72) 48%, rgba(24,18,12,.34) 100%);
 }
 .hero__inner{
   position:relative; z-index:1;
