@@ -202,6 +202,24 @@ input{ font-family:inherit; }
 }
 
 .authpane[hidden]{ display:none !important; }
+.tabs[hidden]{ display:none !important; }
+
+/* ---------- 가입 완료 ---------- */
+
+.authdone{ text-align:center; animation:riseIn .35s cubic-bezier(.2,.8,.3,1) both; }
+
+.authdone__icon{
+  font-size:46px; margin-bottom:12px;
+  animation:pop .5s ease .1s both;
+}
+.authdone__title{
+  margin:0 0 10px; font-family:var(--serif);
+  font-size:22px; font-weight:700; color:var(--olive);
+}
+.authdone__desc{
+  margin:0 0 22px; font-size:13.5px; line-height:1.75; color:var(--ink-soft);
+}
+.authdone__desc b{ color:var(--ink); }
 
 /* ---------- 주문 방식 선택 ---------- */
 

@@ -202,9 +202,10 @@
     <!-- 로그인 -->
     <form id="loginForm" class="authpane" novalidate>
       <div class="field">
-        <label class="field__label" for="loginId">아이디</label>
-        <input class="field__input" type="text" id="loginId"
-               placeholder="아이디를 입력하세요" autocomplete="username" spellcheck="false">
+        <label class="field__label" for="loginEmail">이메일</label>
+        <input class="field__input" type="email" id="loginEmail"
+               placeholder="name@example.com" autocomplete="email"
+               spellcheck="false" autocapitalize="off">
       </div>
       <div class="field">
         <label class="field__label" for="loginPw">비밀번호</label>
@@ -214,17 +215,18 @@
       <p class="gate__error" id="loginError" role="alert"></p>
       <button class="btn-primary" type="submit">로그인</button>
       <p class="gate__hint">
-        체험용 계정 — 아이디 <b>guest</b> / 비밀번호 <b>1234</b><br>
-        처음이시라면 <button class="linkbtn" type="button" data-tab-go="signup">회원가입</button>을 해주세요.
+        아직 계정이 없으신가요?
+        <button class="linkbtn" type="button" data-tab-go="signup">회원가입</button>
       </p>
     </form>
 
     <!-- 회원가입 -->
     <form id="signupForm" class="authpane" novalidate hidden>
       <div class="field">
-        <label class="field__label" for="signupId">아이디</label>
-        <input class="field__input" type="text" id="signupId"
-               placeholder="3자 이상 입력하세요" autocomplete="username" spellcheck="false">
+        <label class="field__label" for="signupEmail">이메일</label>
+        <input class="field__input" type="email" id="signupEmail"
+               placeholder="name@example.com" autocomplete="email"
+               spellcheck="false" autocapitalize="off">
       </div>
       <div class="field">
         <label class="field__label" for="signupPw">비밀번호</label>
@@ -237,12 +239,20 @@
                placeholder="비밀번호를 한 번 더 입력하세요" autocomplete="new-password">
       </div>
       <p class="gate__error" id="signupError" role="alert"></p>
-      <button class="btn-primary" type="submit">가입하고 바로 시작</button>
+      <button class="btn-primary" type="submit">회원가입</button>
       <p class="gate__hint">
-        아이디와 비밀번호만 있으면 가입됩니다.<br>
-        입력하신 정보는 서버로 전송되지 않고 <b>이 브라우저에만</b> 저장됩니다.
+        이메일과 비밀번호만 입력하면 가입이 완료됩니다.<br>
+        비밀번호는 <b>Supabase</b> 가 암호화해 보관하며, 이 사이트에는 저장되지 않습니다.
       </p>
     </form>
+
+    <!-- 가입 완료 -->
+    <div class="authpane authdone" id="signupDone" hidden>
+      <div class="authdone__icon">✅</div>
+      <h3 class="authdone__title">가입이 완료되었습니다</h3>
+      <p class="authdone__desc" id="signupDoneDesc"></p>
+      <button class="btn-primary" type="button" id="signupDoneBtn">쇼핑 시작하기</button>
+    </div>
   </div>
 </div>
 

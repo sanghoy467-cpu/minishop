@@ -25,43 +25,56 @@ var DB = (function () {
     client = null;
   }
 
-  /**
-   * 이 상점은 이메일 대신 "아이디"로 가입합니다.
-   * Supabase Auth 는 이메일을 요구하므로 아이디를 내부 전용 주소로 바꿔 씁니다.
-   * (실제로 메일이 발송되지는 않습니다 — 프로젝트가 자동 확인 설정이라 가입 즉시 로그인됩니다)
-   */
-  function idToEmail(id) {
-    return String(id).trim().toLowerCase() + '@minishop.local';
-  }
-
-  /** Supabase 사용자 객체에서 화면에 보여줄 아이디를 꺼냅니다. */
+  /** 화면에 보여줄 이름 — 이메일의 @ 앞부분을 씁니다. */
   function usernameOf(user) {
     if (!user) return null;
     if (user.user_metadata && user.user_metadata.username) return user.user_metadata.username;
     return String(user.email || '').split('@')[0];
   }
 
-  /** Supabase 가 돌려준 영문 오류를 한국어 안내로 바꿉니다. */
+  /**
+   * Supabase 가 돌려준 영문 오류를 한국어 안내로 바꿉니다.
+   * 코드가 바뀌어도 동작하도록 error_code 와 메시지를 함께 확인합니다.
+   */
   function describeError(error, fallback) {
     if (!error) return fallback;
-    var code = error.code || error.error_code || '';
-    var msg = String(error.message || '');
+    var code = String(error.code || error.error_code || '');
+    var msg = String(error.message || error.msg || '');
 
-    if (code === 'user_already_exists' || /already registered/i.test(msg)) {
-      return '이미 사용 중인 아이디입니다.';
+    // --- 회원가입 ---
+    if (code === 'user_already_exists' || code === 'email_exists' ||
+        /already registered|already been registered/i.test(msg)) {
+      return '이미 가입된 이메일입니다. 로그인해 주세요.';
     }
-    if (code === 'invalid_credentials' || /invalid login/i.test(msg)) {
-      return '아이디 또는 비밀번호가 올바르지 않습니다.';
+    if (code === 'validation_failed' || /invalid format|unable to validate email/i.test(msg)) {
+      return '이메일 형식이 올바르지 않습니다. 예) name@example.com';
     }
-    if (code === 'weak_password' || /at least 6/i.test(msg)) {
+    if (code === 'weak_password' || /at least 6|password should be/i.test(msg)) {
       return '비밀번호는 6자 이상 입력해 주세요.';
     }
-    if (code === 'over_email_send_rate_limit' || /rate limit/i.test(msg)) {
+    if (code === 'signup_disabled' || /signups not allowed|signup is disabled/i.test(msg)) {
+      return '현재 회원가입이 중단되어 있습니다.';
+    }
+    if (code === 'email_address_not_authorized' || /not authorized/i.test(msg)) {
+      return '이 이메일 주소로는 가입할 수 없습니다.';
+    }
+
+    // --- 로그인 ---
+    if (code === 'invalid_credentials' || /invalid login/i.test(msg)) {
+      return '이메일 또는 비밀번호가 올바르지 않습니다.';
+    }
+    if (code === 'email_not_confirmed' || /email not confirmed/i.test(msg)) {
+      return '이메일 인증이 완료되지 않았습니다. 받은 편지함을 확인해 주세요.';
+    }
+
+    // --- 공통 ---
+    if (/rate limit|too many requests/i.test(msg) || code === '429') {
       return '요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요.';
     }
-    if (/fetch|network/i.test(msg)) {
-      return '서버에 연결할 수 없습니다. 네트워크를 확인해 주세요.';
+    if (/failed to fetch|networkerror|network request failed/i.test(msg)) {
+      return '서버에 연결할 수 없습니다. 네트워크 상태를 확인해 주세요.';
     }
+
     return fallback || msg || '알 수 없는 오류가 발생했습니다.';
   }
 
@@ -82,28 +95,36 @@ var DB = (function () {
         }).catch(function () { return null; });
       },
 
-      /** 회원가입 — 성공 시 그대로 로그인 상태가 됩니다. */
-      signUp: function (id, password) {
+      /**
+       * 회원가입 (이메일 + 비밀번호)
+       * @returns {Promise<{user:?{id,uid}, needsConfirm:boolean, email:string}>}
+       *   needsConfirm 이 true 면 이메일 인증이 필요해 아직 로그인되지 않은 상태입니다.
+       */
+      signUp: function (email, password) {
         if (!client) return Promise.reject(new Error('offline'));
-        return client.auth.signUp({
-          email: idToEmail(id),
-          password: password,
-          options: { data: { username: id } }
-        }).then(function (res) {
-          if (res.error) throw res.error;
-          if (!res.data.session) {
-            // 이메일 확인이 켜져 있는 프로젝트라면 세션이 없을 수 있습니다.
-            throw new Error('가입은 되었지만 자동 로그인에 실패했습니다. 로그인 탭에서 로그인해 주세요.');
-          }
-          return { id: id, uid: res.data.user.id };
-        });
+        var addr = String(email).trim();
+        return client.auth.signUp({ email: addr, password: password })
+          .then(function (res) {
+            if (res.error) throw res.error;
+
+            // 이 프로젝트는 자동 확인이 켜져 있어 보통 바로 세션이 생깁니다.
+            // 확인 메일 설정이 켜진 경우에는 세션 없이 성공할 수 있습니다.
+            if (!res.data.session) {
+              return { user: null, needsConfirm: true, email: addr };
+            }
+            return {
+              user: { id: usernameOf(res.data.user), uid: res.data.user.id },
+              needsConfirm: false,
+              email: addr
+            };
+          });
       },
 
-      /** 로그인 */
-      signIn: function (id, password) {
+      /** 로그인 (이메일 + 비밀번호) */
+      signIn: function (email, password) {
         if (!client) return Promise.reject(new Error('offline'));
         return client.auth.signInWithPassword({
-          email: idToEmail(id),
+          email: String(email).trim(),
           password: password
         }).then(function (res) {
           if (res.error) throw res.error;

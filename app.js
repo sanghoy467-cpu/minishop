@@ -179,18 +179,30 @@
     $('#loginForm').addEventListener('submit', function (e) {
       e.preventDefault();
       var form = e.target;
-      var id = $('#loginId').value.trim();
+      var email = $('#loginEmail').value.trim();
       var pw = $('#loginPw').value;
       var err = $('#loginError');
 
-      if (!id) { err.textContent = '아이디를 입력해 주세요.'; $('#loginId').focus(); return; }
-      if (!pw) { err.textContent = '비밀번호를 입력해 주세요.'; $('#loginPw').focus(); return; }
-      if (!DB.online) { err.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.'; return; }
+      if (!email) {
+        err.textContent = '이메일을 입력해 주세요.';
+        $('#loginEmail').focus(); return;
+      }
+      if (!isEmail(email)) {
+        err.textContent = '이메일 형식이 올바르지 않습니다. 예) name@example.com';
+        $('#loginEmail').select(); return;
+      }
+      if (!pw) {
+        err.textContent = '비밀번호를 입력해 주세요.';
+        $('#loginPw').focus(); return;
+      }
+      if (!DB.online) {
+        err.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.'; return;
+      }
 
       err.textContent = '';
       busy(form, true, '로그인 중…');
 
-      DB.auth.signIn(id, pw).then(function (user) {
+      DB.auth.signIn(email, pw).then(function (user) {
         $('#loginPw').value = '';
         busy(form, false);
         signedIn(user, user.id + '님, 상호상회에 오신 것을 환영합니다');
@@ -204,19 +216,24 @@
     // --- 회원가입 ---
     $('#signupForm').addEventListener('submit', function (e) {
       e.preventDefault();
-      var form = e.target;
-      var id  = $('#signupId').value.trim();
-      var pw  = $('#signupPw').value;
-      var pw2 = $('#signupPw2').value;
-      var err = $('#signupError');
+      var form  = e.target;
+      var email = $('#signupEmail').value.trim();
+      var pw    = $('#signupPw').value;
+      var pw2   = $('#signupPw2').value;
+      var err   = $('#signupError');
 
-      if (id.length < 3) {
-        err.textContent = '아이디는 3자 이상 입력해 주세요.';
-        $('#signupId').focus(); return;
+      // 서버에 보내기 전에 걸러낼 수 있는 것은 먼저 안내합니다.
+      if (!email) {
+        err.textContent = '이메일을 입력해 주세요.';
+        $('#signupEmail').focus(); return;
       }
-      if (!/^[A-Za-z0-9._-]+$/.test(id)) {
-        err.textContent = '아이디는 영문·숫자와 . _ - 만 쓸 수 있습니다.';
-        $('#signupId').select(); return;
+      if (!isEmail(email)) {
+        err.textContent = '이메일 형식이 올바르지 않습니다. 예) name@example.com';
+        $('#signupEmail').select(); return;
+      }
+      if (!pw) {
+        err.textContent = '비밀번호를 입력해 주세요.';
+        $('#signupPw').focus(); return;
       }
       if (pw.length < 6) {
         err.textContent = '비밀번호는 6자 이상 입력해 주세요.';
@@ -226,20 +243,36 @@
         err.textContent = '비밀번호가 서로 일치하지 않습니다.';
         $('#signupPw2').select(); return;
       }
-      if (!DB.online) { err.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.'; return; }
+      if (!DB.online) {
+        err.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.'; return;
+      }
 
       err.textContent = '';
       busy(form, true, '가입 중…');
 
-      DB.auth.signUp(id, pw).then(function (user) {
+      DB.auth.signUp(email, pw).then(function (result) {
         $('#signupPw').value = '';
         $('#signupPw2').value = '';
         busy(form, false);
-        signedIn(user, '가입 완료! ' + user.id + '님 환영합니다');
+        showSignupDone(result);
       }).catch(function (error) {
         busy(form, false);
         err.textContent = DB.describeError(error, '회원가입에 실패했습니다.');
       });
+    });
+
+    // --- 가입 완료 화면의 "쇼핑 시작하기" ---
+    $('#signupDoneBtn').addEventListener('click', function () {
+      var user = $('#signupDoneBtn').dataset.uid
+        ? { id: $('#signupDoneBtn').dataset.name, uid: $('#signupDoneBtn').dataset.uid }
+        : null;
+
+      if (user) {
+        signedIn(user, user.id + '님, 상호상회에 오신 것을 환영합니다');
+      } else {
+        // 이메일 인증이 필요한 경우 — 로그인 탭으로 보냅니다.
+        switchTab('login');
+      }
     });
 
     // --- 로그아웃 ---
@@ -270,11 +303,16 @@
     });
   }
 
+  /** 간단한 이메일 형식 검사 — 서버가 다시 한 번 검증합니다. */
+  function isEmail(value) {
+    return /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(value);
+  }
+
   function openAuth(tab) {
     switchTab(tab || 'login');
     openModal('authModal');
     setTimeout(function () {
-      $(tab === 'signup' ? '#signupId' : '#loginId').focus();
+      $(tab === 'signup' ? '#signupEmail' : '#loginEmail').focus();
     }, 140);
   }
 
@@ -284,8 +322,35 @@
     $('#tabSignup').classList.toggle('is-active', isSignup);
     $('#loginForm').hidden = isSignup;
     $('#signupForm').hidden = !isSignup;
+    $('#signupDone').hidden = true;          // 가입 완료 화면은 항상 접어둡니다
+    $('.tabs').hidden = false;
     $('#loginError').textContent = '';
     $('#signupError').textContent = '';
+  }
+
+  /** 가입 성공 화면 — 폼 대신 완료 메시지를 보여줍니다. */
+  function showSignupDone(result) {
+    $('#loginForm').hidden = true;
+    $('#signupForm').hidden = true;
+    $('.tabs').hidden = true;
+    $('#signupDone').hidden = false;
+
+    var btn = $('#signupDoneBtn');
+
+    if (result.needsConfirm) {
+      // 이메일 인증 설정이 켜져 있는 경우
+      $('#signupDoneDesc').innerHTML =
+        escapeHtml(result.email) + ' 로<br>인증 메일을 보냈습니다. 메일을 확인해 주세요.';
+      btn.textContent = '로그인하러 가기';
+      delete btn.dataset.uid;
+      delete btn.dataset.name;
+    } else {
+      $('#signupDoneDesc').innerHTML =
+        '<b>' + escapeHtml(result.email) + '</b><br>이제 이 계정으로 어디서든 로그인할 수 있습니다.';
+      btn.textContent = '쇼핑 시작하기';
+      btn.dataset.uid = result.user.uid;
+      btn.dataset.name = result.user.id;
+    }
   }
 
   /** 상단바 · 헤더의 로그인 상태 표시를 갱신합니다. */
