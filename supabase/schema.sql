@@ -77,41 +77,26 @@ create policy "회원은 자기 주문만 조회할 수 있다"
 
 
 -- ---------------------------------------------------------
--- 3. 상품 데이터 (29종)
+-- ---------------------------------------------------------
+-- 3. 상품 데이터 (주방용품 믹서기 13종)
 --    이미 있으면 최신 값으로 갱신합니다.
 -- ---------------------------------------------------------
 insert into public.products
   (id, name, category, brand, price, discount, rating, reviews, flag, emoji, image)
 values
-  (1, '레드 에나멜 주물 프라이팬 26cm', '냄비·팬', '상호키친', 89000, 35, 4.8, 1342, 'BEST', '🍳', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZnJwYW5fZnJ5aW5nX2Nvb2tpbmdfa2l0Y2hlbi1pbWFnZS1reWJkMXM0Ny5qcGc.jpg'),
-  (2, '세라믹 절구 & 원목 도마 3종 세트', '조리도구', '상호우드', 46000, 28, 4.6, 512, '', '🥣', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvcHg2OTkwNDQtaW1hZ2Uta3d2eGgyMGguanBn.jpg'),
-  (3, '스테인리스 3중바닥 양수냄비 24cm', '냄비·팬', '상호키친', 74000, 32, 4.7, 876, 'BEST', '🍲', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvYTAxOS1qYWt1YmstMDg1Ny1jb29raW5nLWhvbWVtYWRlLWNoaWNrZW4tYnJvdGguanBn.jpg'),
-  (4, '캠핑 세라믹 머그 350ml', '컵·잔', '데일리컵', 16800, 22, 4.5, 2104, '', '☕', 'https://cdn.stocksnap.io/img-thumbs/960w/M4PI6CXDDP.jpg'),
-  (5, '무선 전기포트 1.7L 자동전원차단', '주방가전', '상호일렉', 39900, 30, 4.4, 1588, 'NEW', '🫖', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZnJlbGVjdHJpY19rZXR0bGVfcGxhc3RpY193aGl0ZS1pbWFnZS1reWNoOGlieC5qcGc.jpg'),
-  (6, '수제 원목 스프 국자', '조리도구', '상호우드', 18500, 18, 4.6, 341, '', '🥄', 'https://cdn.stocksnap.io/img-thumbs/960w/D3C224D972.jpg'),
-  (7, '스테인리스 풍선형 거품기 28cm', '조리도구', '베이크홈', 12900, 25, 4.7, 967, '', '🥚', 'https://cdn.stocksnap.io/img-thumbs/960w/HBF5CWQP3S.jpg'),
-  (9, '프리시즌 무쇠 스킬렛 25cm', '냄비·팬', '아이언마스터', 62000, 40, 4.9, 1735, 'BEST', '🍳', 'https://cdn.stocksnap.io/img-thumbs/960w/AWIJ3PXKJE.jpg'),
-  (10, '헤비 글라스 텀블러 420ml 2P', '컵·잔', '데일리컵', 19800, 20, 4.3, 654, '', '🥃', 'https://cdn.stocksnap.io/img-thumbs/960w/BM56P5JIA9.jpg'),
-  (11, '블랙 도자기 티포트 700ml', '컵·잔', '차하루', 38000, 26, 4.6, 389, '', '🫖', 'https://cdn.stocksnap.io/img-thumbs/960w/5811FEC469.jpg'),
-  (12, '스테인리스 양날 감자칼', '조리도구', '상호키친', 7900, 30, 4.7, 3210, 'BEST', '🥔', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL3B4MTA4Mzg0Ni1pbWFnZS1rd3Z3YzBxZS5qcGc.jpg'),
-  (13, '우드 논스틱 뒤집개 2P 세트', '조리도구', '상호우드', 15600, 24, 4.5, 782, '', '🥄', 'https://cdn.stocksnap.io/img-thumbs/960w/QSUFZLT8SV.jpg'),
-  (14, '원목 계량스푼 5종 세트', '조리도구', '베이크홈', 13400, 35, 4.4, 521, '', '🧂', 'https://cdn.stocksnap.io/img-thumbs/960w/URN8E7KDE7.jpg'),
-  (15, '비치우드 반죽 밀대 45cm', '조리도구', '베이크홈', 22000, 27, 4.6, 298, '', '🥐', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZyYmFrZV9kb3VnaF9wcmVwYXJhdGlvbl9mbG91ci1pbWFnZS1reWJjNmQ4di5qcGc.jpg'),
-  (16, '레드 커피잔 & 소서 2인조', '컵·잔', '차하루', 32000, 38, 4.7, 1043, '', '☕', 'https://cdn.stocksnap.io/img-thumbs/960w/NVKXLIKJ25.jpg'),
-  (17, '대나무 젓가락 10P & 수저통 세트', '식기', '상호우드', 21500, 29, 4.5, 612, '', '🥢', 'https://cdn.stocksnap.io/img-thumbs/960w/3957479LEK.jpg'),
-  (18, '디너 테이블웨어 풀세트 16P', '식기', '상호키친', 128000, 45, 4.8, 476, 'BEST', '🍽️', 'https://cdn.stocksnap.io/img-thumbs/960w/IWUAHEIBSE.jpg'),
-  (19, '무쇠 전골 불판 28cm', '냄비·팬', '아이언마스터', 58000, 34, 4.6, 389, '', '🔥', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTA2L3drNjEyODg4MDEtaW1hZ2Uta3A2Y25zNm8uanBn.jpg'),
-  (20, '논스틱 머핀 베이킹 트레이 6구', '베이킹', '베이크홈', 24900, 31, 4.5, 1124, 'NEW', '🧁', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL3B4MTEwOTI3Ni1pbWFnZS1rd3Z3YThzcy5qcGc.jpg'),
-  (21, '코튼 캔버스 주방 앞치마', '주방잡화', '상호리빙', 26800, 40, 4.6, 854, '', '🦺', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvcHUyMzMyODk2LWltYWdlLWt3dndtMzZzLmpwZw.jpg'),
-  (22, '유리 소금·후추 디스펜서 2P', '주방잡화', '상호리빙', 11900, 23, 4.4, 467, '', '🧂', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZsMzYxNjA0NDg4Mi1pbWFnZS1reWJlaHJybi5qcGc.jpg'),
-  (23, '스테인리스 진공 보온병 500ml', '주방잡화', '상호일렉', 34000, 36, 4.7, 1902, 'BEST', '🧴', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvdXB3azYyMjkwNDQxLXdpa2ltZWRpYS1pbWFnZS1rb3dzMWFydS5qcGc.jpg'),
-  (24, '화이트 도자기 티포트 세트 4P', '컵·잔', '차하루', 54000, 42, 4.8, 337, '', '🫖', 'https://cdn.stocksnap.io/img-thumbs/960w/VSLCRUIGUD.jpg'),
-  (25, '원목 조리스푼 6P 풀세트', '조리도구', '상호우드', 29800, 37, 4.7, 1266, 'BEST', '🥄', 'https://cdn.stocksnap.io/img-thumbs/960w/NW1WJ88VGJ.jpg'),
-  (26, '원목 서빙 트레이 라지', '식기', '상호우드', 31000, 25, 4.5, 403, '', '🪵', 'https://cdn.stocksnap.io/img-thumbs/960w/W8LJ1IW97U.jpg'),
-  (27, '스테인리스 커트러리 12P 세트', '식기', '상호키친', 42000, 33, 4.6, 729, '', '🍴', 'https://cdn.stocksnap.io/img-thumbs/960w/W7U3CO2QM3.jpg'),
-  (28, '스테인리스 국자 32cm', '조리도구', '상호키친', 9800, 21, 4.4, 1087, '', '🥣', 'https://cdn.stocksnap.io/img-thumbs/960w/NEJP8ZW18V.jpg'),
-  (29, '법랑 캠핑 머그 300ml', '컵·잔', '데일리컵', 14500, 19, 4.6, 1455, 'NEW', '☕', 'https://cdn.stocksnap.io/img-thumbs/960w/6D1M1USFFO.jpg'),
-  (30, '스테인리스 휘슬 주전자 2.5L', '냄비·팬', '상호키친', 45000, 29, 4.7, 698, '', '🫖', 'https://cdn.stocksnap.io/img-thumbs/960w/ND9JSEK2QN.jpg')
+  (1, '프로 고속 블렌더 1.5L 2200W', '고속블렌더', '상호블렌드', 189000, 38, 4.9, 2341, 'BEST', '🥤', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvYTAxOS1qYWt1YmstMDQyOS1oZWFsdGh5LXNtb290aGllLWluZ3JlZGllbnRzLmpwZw.jpg'),
+  (2, '진공 고속 블렌더 1.2L 산화방지', '고속블렌더', '상호블렌드', 234000, 42, 4.8, 1128, 'BEST', '🥤', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvYTAxOS1qYWt1YmstMDM1OC1oZWFsdGh5LXNtb290aGllLWluZ3JlZGllbnRzMS5qcGc.jpg'),
+  (3, '무선 핸드블렌더 5단 스틱형', '핸드블렌더', '상호블렌드', 78000, 35, 4.7, 1876, '', '🧃', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvYTAxOS1qYWt1YmstMDg1Mi13aGlwcGluZy1kb3VnaC5qcGc.jpg'),
+  (4, '스탠드 믹서 5.5L 반죽 전용', '스탠드믹서', '베이크홈', 398000, 30, 4.9, 864, 'BEST', '🎂', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvaXM5NTE3LWltYWdlLWt3dnlmaGQ2LmpwZw.jpg'),
+  (5, '핸드 믹서 7단 300W 거품기', '핸드믹서', '베이크홈', 46000, 33, 4.6, 1544, '', '🥚', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvcHg5NDY2MjYtaW1hZ2Uta3d5bzB2aDAuanBn.jpg'),
+  (6, '휴대용 텀블러 믹서 400ml USB충전', '휴대용믹서', '상호블렌드', 52000, 40, 4.5, 2765, 'NEW', '🧋', 'https://images.unsplash.com/photo-1585515320310-259814833e62?w=900&q=80'),
+  (7, '다용도 믹서 세트 4종 컵', '복합믹서', '상호블렌드', 142000, 36, 4.7, 932, '', '🍹', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvYTAxOS1qYWt1YmstMDE4OC1tYWtpbmctaGVhbHRoeS1zbW9vdGhpZS5qcGc.jpg'),
+  (8, '미니 초퍼 분쇄기 600ml', '초퍼·분쇄기', '상호블렌드', 39800, 28, 4.5, 1203, '', '🔪', 'https://cdn.stocksnap.io/img-thumbs/960w/B7CBYNNKVF.jpg'),
+  (9, '원두 그라인더 수동 세라믹날', '그라인더', '차하루', 34000, 25, 4.6, 678, '', '☕', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZyY29mZmVlX2NvZmZlZV9ncmluZGVyX21pbGwtaW1hZ2Uta3liYnNyOTUuanBn.jpg'),
+  (10, '원두 그라인더 & 드립 세트', '그라인더', '차하루', 89000, 31, 4.7, 445, 'NEW', '☕', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZnJjb2ZmZWVfZ3JpbmRlcl9jb2ZmZWVfcGFkcy1pbWFnZS1reWJkeHZncy5qcGc.jpg'),
+  (11, '전동 커피 그라인더 무단조절', '그라인더', '차하루', 124000, 27, 4.8, 1067, '', '⚙️', 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=900&q=80'),
+  (12, '유리 수동 착즙기 레몬 스퀴저', '착즙기', '상호블렌드', 18900, 22, 4.4, 834, '', '🍋', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL3N2MTk3MzE5LWltYWdlLWt3dnVoMGFkLmpwZw.jpg'),
+  (13, '핸드 착즙기 시트러스 프레스', '착즙기', '상호블렌드', 26500, 29, 4.5, 1392, '', '🍊', 'https://cdn.stocksnap.io/img-thumbs/960w/BZCDFHLKZR.jpg')
 on conflict (id) do update set
   name     = excluded.name,
   category = excluded.category,
