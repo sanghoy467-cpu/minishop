@@ -134,7 +134,7 @@
     state.user = user;                       // { id, uid }
     renderAuthBar();
     closeModals();
-    toast(welcomeMessage || (user.id + '님, 환영합니다'), '🥤');
+    toast(welcomeMessage || (user.id + '님, 환영합니다'), '💵');
 
     // 주문서에서 로그인하러 온 경우라면 주문서를 다시 열어 줍니다.
     if (pendingCheckout) {
@@ -369,7 +369,7 @@
     var btn = $('#headerAuthBtn');
     if (signedIn) {
       btn.querySelector('.label').textContent = state.user.id;
-      btn.querySelector('.icon-btn__emoji').textContent = '🥤';
+      btn.querySelector('.icon-btn__emoji').textContent = '💵';
       btn.classList.remove('icon-btn--accent');
     } else {
       btn.querySelector('.label').textContent = '로그인';

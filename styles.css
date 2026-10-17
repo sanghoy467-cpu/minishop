@@ -1,6 +1,6 @@
 /* =========================================================
    삼환 물류(주) (Samhwan Logistics) — Mini Shop
-   믹서기 전문점
+   화폐판매 — 동전과 지폐(구권 · 신권)
    ========================================================= */
 
 :root{
@@ -34,9 +34,9 @@
           "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
   --serif: "Nanum Myeongjo", "Batang", Georgia, serif;
 
-  /* 배경 이미지 — 재료를 담은 믹서기 용기 (인물 없음)
+  /* 배경 이미지 — 여러 종류의 옛날 지폐 (독일 제국은행권 구권)
      Rawpixel (CC0 / Public Domain) — 저작자 표시 의무 없음 */
-  --hero-bg: url("https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvYTAxOS1qYWt1YmstMDQyOS1oZWFsdGh5LXNtb290aGllLWluZ3JlZGllbnRzLmpwZw.jpg");
+  --hero-bg: url("https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZyYmFua19ub3RlX2ltcGVyaWFsX2Jhbmtub3RlLWltYWdlLWt5YmM3ZXJhLmpwZw.jpg");
 }
 
 *,*::before,*::after{ box-sizing:border-box; }
@@ -75,8 +75,8 @@ input{ font-family:inherit; }
 
 .modal__backdrop{
   position:absolute; inset:0;
-  background-color:rgba(44,30,20,.80);
-  background-image:linear-gradient(rgba(44,30,20,.66), rgba(44,30,20,.84)), var(--hero-bg);
+  background-color:rgba(36,27,16,.82);
+  background-image:linear-gradient(rgba(36,27,16,.70), rgba(36,27,16,.86)), var(--hero-bg);
   background-size:cover;
   background-position:center;
   animation:fadeIn .25s ease both;
@@ -445,14 +445,14 @@ input{ font-family:inherit; }
   position:relative; overflow:hidden;
   display:grid; align-items:center;
   color:#fff;
-  background-color:#3b2a1c;
+  background-color:#2e2314;
   background-image:var(--hero-bg);
   background-size:cover;
   background-position:center 50%;
 }
 .hero::after{
   content:""; position:absolute; inset:0;
-  background:linear-gradient(100deg, rgba(38,26,16,.90) 0%, rgba(38,26,16,.70) 48%, rgba(38,26,16,.30) 100%);
+  background:linear-gradient(100deg, rgba(32,24,14,.92) 0%, rgba(32,24,14,.74) 48%, rgba(32,24,14,.34) 100%);
 }
 .hero__inner{
   position:relative; z-index:1;

@@ -1,5 +1,5 @@
 -- =========================================================
--- 삼환 물류(주) (minishop) — Supabase 스키마
+-- 삼환 물류(주) — 화폐판매 Supabase 스키마
 --
 -- 실행 방법
 --   Supabase 대시보드 → SQL Editor → 아래 전체를 붙여넣고 Run
@@ -86,25 +86,31 @@ create policy "회원은 자기 주문만 조회할 수 있다"
 
 -- ---------------------------------------------------------
 -- ---------------------------------------------------------
--- 3. 상품 데이터 (주방용품 믹서기 13종)
+-- ---------------------------------------------------------
+-- 3. 상품 데이터 (화폐 18종 — 동전과 지폐 구권 · 신권)
 --    이미 있으면 최신 값으로 갱신합니다.
 -- ---------------------------------------------------------
 insert into public.products
   (id, name, category, brand, price, discount, rating, reviews, flag, emoji, image)
 values
-  (1, '프로 고속 블렌더 1.5L 2200W', '고속블렌더', '상호블렌드', 189000, 38, 4.9, 2341, 'BEST', '🥤', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvYTAxOS1qYWt1YmstMDQyOS1oZWFsdGh5LXNtb290aGllLWluZ3JlZGllbnRzLmpwZw.jpg'),
-  (2, '진공 고속 블렌더 1.2L 산화방지', '고속블렌더', '상호블렌드', 234000, 42, 4.8, 1128, 'BEST', '🥤', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvYTAxOS1qYWt1YmstMDM1OC1oZWFsdGh5LXNtb290aGllLWluZ3JlZGllbnRzMS5qcGc.jpg'),
-  (3, '무선 핸드블렌더 5단 스틱형', '핸드블렌더', '상호블렌드', 78000, 35, 4.7, 1876, '', '🧃', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvYTAxOS1qYWt1YmstMDg1Mi13aGlwcGluZy1kb3VnaC5qcGc.jpg'),
-  (4, '스탠드 믹서 5.5L 반죽 전용', '스탠드믹서', '베이크홈', 398000, 30, 4.9, 864, 'BEST', '🎂', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvaXM5NTE3LWltYWdlLWt3dnlmaGQ2LmpwZw.jpg'),
-  (5, '핸드 믹서 7단 300W 거품기', '핸드믹서', '베이크홈', 46000, 33, 4.6, 1544, '', '🥚', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvcHg5NDY2MjYtaW1hZ2Uta3d5bzB2aDAuanBn.jpg'),
-  (6, '휴대용 텀블러 믹서 400ml USB충전', '휴대용믹서', '상호블렌드', 52000, 40, 4.5, 2765, 'NEW', '🧋', 'https://images.unsplash.com/photo-1585515320310-259814833e62?w=900&q=80'),
-  (7, '다용도 믹서 세트 4종 컵', '복합믹서', '상호블렌드', 142000, 36, 4.7, 932, '', '🍹', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvYTAxOS1qYWt1YmstMDE4OC1tYWtpbmctaGVhbHRoeS1zbW9vdGhpZS5qcGc.jpg'),
-  (8, '미니 초퍼 분쇄기 600ml', '초퍼·분쇄기', '상호블렌드', 39800, 28, 4.5, 1203, '', '🔪', 'https://cdn.stocksnap.io/img-thumbs/960w/B7CBYNNKVF.jpg'),
-  (9, '원두 그라인더 수동 세라믹날', '그라인더', '차하루', 34000, 25, 4.6, 678, '', '☕', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZyY29mZmVlX2NvZmZlZV9ncmluZGVyX21pbGwtaW1hZ2Uta3liYnNyOTUuanBn.jpg'),
-  (10, '원두 그라인더 & 드립 세트', '그라인더', '차하루', 89000, 31, 4.7, 445, 'NEW', '☕', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZnJjb2ZmZWVfZ3JpbmRlcl9jb2ZmZWVfcGFkcy1pbWFnZS1reWJkeHZncy5qcGc.jpg'),
-  (11, '전동 커피 그라인더 무단조절', '그라인더', '차하루', 124000, 27, 4.8, 1067, '', '⚙️', 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=900&q=80'),
-  (12, '유리 수동 착즙기 레몬 스퀴저', '착즙기', '상호블렌드', 18900, 22, 4.4, 834, '', '🍋', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL3N2MTk3MzE5LWltYWdlLWt3dnVoMGFkLmpwZw.jpg'),
-  (13, '핸드 착즙기 시트러스 프레스', '착즙기', '상호블렌드', 26500, 29, 4.5, 1392, '', '🍊', 'https://cdn.stocksnap.io/img-thumbs/960w/BZCDFHLKZR.jpg')
+  (1, '1861년 미국 5달러 대형 구권', '지폐·구권', '고전화폐사', 1850000, 18, 4.9, 142, 'BEST', '💵', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL2xyL3drMjUxODMwMzMtaW1hZ2UuanBn.jpg'),
+  (2, '1862년 미국 50달러 대형 구권', '지폐·구권', '고전화폐사', 3200000, 15, 4.8, 87, 'BEST', '💵', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL2xyL3drMzM0MjIxMjgtaW1hZ2UuanBn.jpg'),
+  (3, '1926년 프랑스 1000프랑 구권', '지폐·구권', '고전화폐사', 680000, 25, 4.7, 213, '', '💶', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTEwL3BkbWlzYzYtd2szMDU5OTkzNS0wMS1pbWFnZV8xLmpwZw.jpg'),
+  (4, '남부연합 5·100달러 구권 2매 세트', '지폐·구권', '고전화폐사', 1240000, 22, 4.6, 96, '', '📜', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZnJiaWxsc19jb25mZWRlcmF0ZV9zdGF0ZXNfYW1lcmljYS1pbWFnZS1reWJlOHpvZC5qcGc.jpg'),
+  (5, '1909년 독일 제국은행권 100마르크', '지폐·구권', '고전화폐사', 145000, 30, 4.7, 458, '', '📜', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZyYmFua19ub3RlX2ltcGVyaWFsX2Jhbmtub3RlXzItaW1hZ2Uta3liYzdkOGEuanBn.jpg'),
+  (6, '독일 제국은행권 구권 모음 5매', '지폐·구권', '고전화폐사', 390000, 28, 4.8, 301, 'BEST', '📜', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZnJtb25leV9kb2xsYXJfYmlsbF9iaWxscy1pbWFnZS1reWJkN25uaS5qcGc.jpg'),
+  (7, '1928년 미국 5달러 소형 신권', '지폐·신권', '프리미엄노트', 920000, 20, 4.8, 176, '', '💵', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL2xyL3drMjQ4ODcyMzctaW1hZ2UuanBn.jpg'),
+  (8, '미국 1달러 신권 미사용 연번호', '지폐·신권', '프리미엄노트', 38000, 26, 4.5, 1204, 'NEW', '💵', 'https://cdn.stocksnap.io/img-thumbs/960w/HHH84SKFXQ.jpg'),
+  (9, '미국 달러 신권 묶음 20매', '지폐·신권', '프리미엄노트', 185000, 24, 4.6, 642, '', '💵', 'https://cdn.stocksnap.io/img-thumbs/960w/RG4XMMLSNU.jpg'),
+  (10, '유로 10유로 신권 10매 연번호', '지폐·신권', '프리미엄노트', 235000, 21, 4.7, 388, 'NEW', '💶', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZybW9uZXlfZXVyb3NfYmFua25vdGVzX2JpbGxzXzAtaW1hZ2Uta3liZDcwZGQuanBn.jpg'),
+  (11, '유로 고액권 200·500 세트', '지폐·신권', '프리미엄노트', 1480000, 12, 4.9, 154, '', '💶', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL2ZybW9uZXlfc2VlbV9ldXJvX2JpbGxzXzQtaW1hZ2Uta3liYjJwZ3UuanBn.jpg'),
+  (12, '1807년 미국 5달러 금화', '금화', '삼환화폐', 4800000, 10, 5.0, 63, 'BEST', '🪙', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL2xyL3drNDI4MTYxMDMtaW1hZ2UuanBn.jpg'),
+  (13, '프랑스 20프랑 세레스 금화', '금화', '삼환화폐', 1120000, 16, 4.8, 227, '', '🪙', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvZmlsZXMvd2Vic2l0ZS8yMDIyLTExL3drNzk2ODk0OTYtaW1hZ2UuanBn.jpg'),
+  (14, '로마 트라야누스 금화 아우레우스', '고대주화', '삼환화폐', 6500000, 8, 5.0, 41, 'BEST', '🏛️', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL2xyL3drODAzOTgwMTYtaW1hZ2UuanBn.jpg'),
+  (15, '로마 하드리아누스 청동화', '고대주화', '삼환화폐', 740000, 19, 4.7, 118, '', '🏛️', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL2xyL3drODAxNDQ3NDMtaW1hZ2UuanBn.jpg'),
+  (16, '빅토리아 여왕 즉위 60주년 기념 금메달', '기념주화', '월드코인', 2850000, 14, 4.9, 72, '', '🏅', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTA5L21ldDE5MDU0OC1pbWFnZS5qcGc.jpg'),
+  (17, '나폴레옹 3세 만국박람회 기념 은메달', '기념주화', '월드코인', 560000, 23, 4.6, 165, '', '🏅', 'https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZmwzOTQ3NzMxNjU1MS1pbWFnZS1reWNqNHpweS5qcGc.jpg'),
+  (18, '세계 각국 주화 30종 컬렉션', '세계주화', '월드코인', 128000, 35, 4.5, 892, 'NEW', '🌏', 'https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL3B4MTI0NzI3OS1pbWFnZS1rd3lxdHkzZy5qcGc.jpg')
 on conflict (id) do update set
   name     = excluded.name,
   category = excluded.category,
