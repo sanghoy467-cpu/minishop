@@ -34,8 +34,9 @@
           "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
   --serif: "Nanum Myeongjo", "Batang", Georgia, serif;
 
-  /* 배경 이미지 — 바닷가 콘도 (히어로 / 로그인·주문 모달 공용) */
-  --hero-bg: url("https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1800&q=80");
+  /* 배경 이미지 — 나무 선반에 도자기가 진열된 프로방스풍 가게
+     StockSnap "Ceramics Pottery" by Barn Images (CC0) */
+  --hero-bg: url("https://cdn.stocksnap.io/img-thumbs/960w/SWDR6XR7YS.jpg");
 }
 
 *,*::before,*::after{ box-sizing:border-box; }
@@ -74,8 +75,8 @@ input{ font-family:inherit; }
 
 .modal__backdrop{
   position:absolute; inset:0;
-  background-color:rgba(9,34,46,.80);
-  background-image:linear-gradient(rgba(9,34,46,.66), rgba(9,34,46,.84)), var(--hero-bg);
+  background-color:rgba(44,30,20,.80);
+  background-image:linear-gradient(rgba(44,30,20,.66), rgba(44,30,20,.84)), var(--hero-bg);
   background-size:cover;
   background-position:center;
   animation:fadeIn .25s ease both;
@@ -401,14 +402,14 @@ input{ font-family:inherit; }
   position:relative; overflow:hidden;
   display:grid; align-items:center;
   color:#fff;
-  background-color:#0c2a3a;
+  background-color:#3b2a1c;
   background-image:var(--hero-bg);
   background-size:cover;
-  background-position:center 42%;
+  background-position:center 46%;
 }
 .hero::after{
   content:""; position:absolute; inset:0;
-  background:linear-gradient(100deg, rgba(7,32,45,.88) 0%, rgba(7,32,45,.66) 46%, rgba(7,32,45,.18) 100%);
+  background:linear-gradient(100deg, rgba(52,34,22,.88) 0%, rgba(52,34,22,.66) 46%, rgba(52,34,22,.16) 100%);
 }
 .hero__inner{
   position:relative; z-index:1;
